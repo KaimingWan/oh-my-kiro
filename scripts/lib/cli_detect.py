@@ -22,7 +22,7 @@ def detect_cli() -> list[str]:
                 return [
                     'claude', '-p',
                     '--allowedTools', 'Bash,Read,Write,Edit,Task,WebSearch,WebFetch',
-                    '--output-format', 'text',
+                    '--output-format', 'stream-json', '--verbose',
                     '--no-session-persistence',
                 ]
         except (subprocess.TimeoutExpired, FileNotFoundError):
