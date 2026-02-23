@@ -36,4 +36,4 @@ DANGEROUS_BASH_PATTERNS_NOCASE=(
 
 INJECTION_PATTERNS='(curl.*\|[[:space:]]*(ba)?sh|wget.*\|[[:space:]]*(ba)?sh|SECRET[[:space:]]+INSTRUCTIONS|hidden[[:space:]]+instructions|ignore[[:space:]]+(all[[:space:]]+)?previous|system[[:space:]]+prompt|<script)'
 
-SECRET_PATTERNS='(AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{35}|sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{36}|-----BEGIN[[:space:]]+(RSA[[:space:]]+)?PRIVATE[[:space:]]+KEY)'
+SECRET_PATTERNS='(AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{35}|sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{36}|-----BEGIN[[:space:]]+(RSA[[:space:]]+)?PRIVATE[[:space:]]+KEY|xox[bpras]-[0-9a-zA-Z-]{10,}|sk_live_[0-9a-zA-Z]{10,}|pk_live_[0-9a-zA-Z]{10,}|npm_[a-zA-Z0-9]{10,}|pypi-[a-zA-Z0-9]{10,}|glpat-[a-zA-Z0-9_-]{20,}|hf_[a-zA-Z0-9]{20,})'

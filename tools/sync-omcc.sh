@@ -150,6 +150,21 @@ else
   info "Step 3.10: .kiro/rules/ source or target not found, skipping"
 fi
 
+
+# ─── Step 3.11: Ensure knowledge/episodes.md and rules.md exist ───────────────
+KNOWLEDGE_DIR="$PROJECT_ROOT/knowledge"
+TEMPLATES_DIR="$OMCC_ROOT/templates/knowledge"
+if [ -d "$KNOWLEDGE_DIR" ] && [ -d "$TEMPLATES_DIR" ]; then
+  for tmpl in episodes.md rules.md; do
+    if [ ! -f "$KNOWLEDGE_DIR/$tmpl" ] && [ -f "$TEMPLATES_DIR/$tmpl" ]; then
+      cp "$TEMPLATES_DIR/$tmpl" "$KNOWLEDGE_DIR/$tmpl"
+      ok "Step 3.11: Created missing $tmpl from template"
+    fi
+  done
+  info "Step 3.11: Knowledge files checked"
+else
+  info "Step 3.11: knowledge/ or templates/ not found, skipping"
+fi
 # ─── Step 4: Update AGENTS.md framework sections ──────────────────────────────
 info "Step 4: Updating AGENTS.md framework sections..."
 AGENTS_MD="$PROJECT_ROOT/AGENTS.md"

@@ -150,6 +150,14 @@ elif [ ! -s "$KNOWLEDGE_INDEX" ]; then
   err "E8: knowledge/INDEX.md is empty"
 fi
 
+
+# ─── W6: knowledge/episodes.md and rules.md missing ──────────────────────────
+for kf in episodes.md rules.md; do
+  if [ ! -f "$PROJECT_ROOT/knowledge/$kf" ]; then
+    warn "W6: knowledge/$kf missing — self-learning chain will not function"
+  fi
+done
+
 # ─── W4: knowledge files >50KB ────────────────────────────────────────────────
 if [ -d "$PROJECT_ROOT/knowledge" ]; then
   while IFS= read -r kfile; do

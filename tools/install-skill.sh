@@ -18,6 +18,26 @@ OMCC_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 err() { echo "ERROR: $*" >&2; exit 1; }
 
+# ─── Injection/secret scan ─────────────────────────────────────────────────────
+PATTERNS_LIB="$(cd "$(dirname "$0")/../hooks/_lib" 2>/dev/null && pwd)/patterns.sh"
+if [ -f "$PATTERNS_LIB" ]; then
+  source "$PATTERNS_LIB"
+fi
+
+scan_skill_file() {
+  local skill_md="$1"
+  [ ! -f "$skill_md" ] && return 0
+  local content
+  content=$(cat "$skill_md")
+  if [ -n "${INJECTION_PATTERNS:-}" ] && echo "$content" | grep -qiE "$INJECTION_PATTERNS"; then
+    err "Injection pattern detected in: $skill_md"
+  fi
+  if [ -n "${SECRET_PATTERNS:-}" ] && echo "$content" | grep -qiE "$SECRET_PATTERNS"; then
+    err "Secret pattern detected in: $skill_md"
+  fi
+}
+
+
 # ─── Overlay JSON helper ───────────────────────────────────────────────────────
 # Adds a skill path to .omcc-overlay.json extra_skills (creates file if absent)
 register_skill_in_overlay() {
@@ -66,6 +86,8 @@ if [ "${1:-}" = "--register-only" ]; then
 
   # Validate SKILL.md exists
   [ -f "$ABS_SKILL_PATH/SKILL.md" ] || err "SKILL.md not found at: $ABS_SKILL_PATH/SKILL.md"
+
+  scan_skill_file "$ABS_SKILL_PATH/SKILL.md"
 
   register_skill_in_overlay "$OVERLAY_FILE" "$SKILL_PATH"
   exit 0
@@ -120,6 +142,9 @@ for installed_dir in "${INSTALLED_DIRS[@]}"; do
 
   mv "$installed_dir" "$dest"
   echo "📂 Moved skill to: $dest"
+
+  # Scan for injection/secrets before registering
+  scan_skill_file "$dest/SKILL.md"
 
   # Register in overlay (use relative path)
   relative_path="skills/$skill_name"

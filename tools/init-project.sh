@@ -106,8 +106,19 @@ cp -r "$TEMPLATE_DIR/hooks" "$TARGET/hooks"
 ln -sf ../hooks "$TARGET/.kiro/hooks"
 ln -sf ../hooks "$TARGET/.claude/hooks"
 cp "$TEMPLATE_DIR/.kiro/agents/"*.json "$TARGET/.kiro/agents/"
-cp "$TEMPLATE_DIR/knowledge/"*.md "$TARGET/knowledge/" 2>/dev/null || true
+cp "$TEMPLATE_DIR/knowledge/INDEX.md" "$TARGET/knowledge/" 2>/dev/null || true
+# Create episodes.md and rules.md from clean templates (not OMCC's own data)
+for tmpl in episodes.md rules.md; do
+  if [ -f "$TEMPLATE_DIR/templates/knowledge/$tmpl" ]; then
+    cp "$TEMPLATE_DIR/templates/knowledge/$tmpl" "$TARGET/knowledge/$tmpl"
+  fi
+done
 cp -r "$TEMPLATE_DIR/knowledge/product" "$TARGET/knowledge/" 2>/dev/null || true
+# Overwrite episodes.md and rules.md with clean templates (no OMCC-specific data)
+if [ -d "$TEMPLATE_DIR/templates/knowledge" ]; then
+  cp "$TEMPLATE_DIR/templates/knowledge/episodes.md" "$TARGET/knowledge/episodes.md"
+  cp "$TEMPLATE_DIR/templates/knowledge/rules.md" "$TARGET/knowledge/rules.md"
+fi
 cp "$TEMPLATE_DIR/docs/INDEX.md" "$TARGET/docs/"
 for d in designs plans research decisions; do
   touch "$TARGET/docs/$d/.gitkeep"
