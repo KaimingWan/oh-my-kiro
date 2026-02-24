@@ -114,7 +114,7 @@ setup
 mkdir -p "$TMP/hooks"
 touch "$TMP/hooks/my-hook.sh"
 # Not chmod +x
-echo '{"extra_hooks": {"PostToolUse": ["hooks/my-hook.sh"]}}' > "$TMP/.omcc-overlay.json"
+echo '{"extra_hooks": {"postToolUse": [{"command": "hooks/my-hook.sh"}]}}' > "$TMP/.omcc-overlay.json"
 OUT=$(bash "$VALIDATE" "$TMP" 2>&1 || true)
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
 assert_exit "E3 non-exec hook exits 1" 1 "$RC"
@@ -127,7 +127,7 @@ setup
 mkdir -p "$TMP/hooks"
 printf '#!/bin/bash\nexit 0\n' > "$TMP/hooks/my-hook.sh"
 chmod +x "$TMP/hooks/my-hook.sh"
-echo '{"extra_hooks": {"PostToolUse": ["hooks/my-hook.sh"]}}' > "$TMP/.omcc-overlay.json"
+echo '{"extra_hooks": {"postToolUse": [{"command": "hooks/my-hook.sh"}]}}' > "$TMP/.omcc-overlay.json"
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
 assert_exit "E3 exec hook exits 0" 0 "$RC"
 teardown

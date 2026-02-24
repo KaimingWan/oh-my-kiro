@@ -17,9 +17,9 @@ Quick reference for extending OMCC in downstream projects.
 1. Create `hooks/project/my-hook.sh` (must be executable)
 2. Register in `.omcc-overlay.json`:
    ```json
-   { "extra_hooks": { "PostToolUse": ["hooks/project/my-hook.sh"] } }
+   { "extra_hooks": { "postToolUse": [{"command": "hooks/project/my-hook.sh"}] } }
    ```
-3. Valid events: `PreToolUse`, `PostToolUse`, `Stop`, `Notification`
+3. Valid events (camelCase): `agentSpawn`, `userPromptSubmit`, `preToolUse`, `postToolUse`, `stop`
 4. Validate: `bash tools/validate-project.sh`
 
 ## Install a Community Skill

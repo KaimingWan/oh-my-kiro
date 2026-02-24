@@ -18,8 +18,8 @@ warn() { echo "WARNING: $*"; WARNINGS=$((WARNINGS + 1)); }
 
 OVERLAY_FILE="$PROJECT_ROOT/.omcc-overlay.json"
 
-# Valid hook event names (Claude Code / Kiro events)
-VALID_EVENTS="PreToolUse PostToolUse Stop UserPromptSubmit TaskCompleted"
+# Valid hook event names (camelCase — canonical overlay format)
+VALID_EVENTS="agentSpawn userPromptSubmit preToolUse postToolUse stop"
 
 # ─── E1: Overlay file validation ──────────────────────────────────────────────
 if [ -f "$OVERLAY_FILE" ]; then
