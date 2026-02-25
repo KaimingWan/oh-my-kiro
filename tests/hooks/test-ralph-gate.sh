@@ -6,6 +6,9 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$PROJECT_DIR"
 
+# Ensure clean environment — tests may run inside a ralph loop
+unset _RALPH_LOOP_RUNNING 2>/dev/null || true
+
 PASS=0
 FAIL=0
 
@@ -31,19 +34,25 @@ run_test() {
 TMPDIR_TEST=$(mktemp -d)
 ORIG_ACTIVE=""
 [ -f "docs/plans/.active" ] && ORIG_ACTIVE=$(cat "docs/plans/.active")
+ORIG_LOCK=""
+[ -f ".ralph-loop.lock" ] && ORIG_LOCK=$(cat ".ralph-loop.lock") && mv ".ralph-loop.lock" "$TMPDIR_TEST/.ralph-loop.lock.bak"
 
 cleanup() {
-  rm -rf "$TMPDIR_TEST"
-  # Remove test lock file if created
-  rm -f ".ralph-loop.lock" 2>/dev/null
+  set +e  # Don't fail on cleanup errors
+  # Restore lock file
+  if [ -n "$ORIG_LOCK" ]; then
+    echo "$ORIG_LOCK" > ".ralph-loop.lock"
+  fi
+  # Remove test artifacts
+  [ -d "$TMPDIR_TEST" ] && command rm -rf "$TMPDIR_TEST"
   # Restore .active
   if [ -n "$ORIG_ACTIVE" ]; then
     echo "$ORIG_ACTIVE" > "docs/plans/.active"
   else
-    rm -f "docs/plans/.active" 2>/dev/null
+    : > "docs/plans/.active"
   fi
-  rm -f "docs/plans/.test-ralph-plan.md" 2>/dev/null
-  rm -f ".skip-ralph" 2>/dev/null
+  command rm -f "docs/plans/.test-ralph-plan.md" 2>/dev/null
+  command rm -f ".skip-ralph" 2>/dev/null
 }
 trap cleanup EXIT
 

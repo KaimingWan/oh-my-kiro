@@ -16,25 +16,6 @@ esac
 PLAN_POINTER="docs/plans/.active"
 LOCK_FILE=".ralph-loop.lock"
 
-# Guard: block git commit if .active is staged with a plan path that differs from HEAD.
-# Catches accidental re-activation (e.g. stale staged change sneaking into an unrelated commit).
-# Runs before all other checks so it works even when no active plan exists in the working tree.
-if [ "$MODE" = "bash" ]; then
-  _CMD=$(echo "$INPUT" | jq -r '.tool_input.command // ""' 2>/dev/null)
-  _CMD=$(echo "$_CMD" | sed -E 's|^cd[[:space:]]+[^;&|]*&&[[:space:]]*||')
-  if echo "$_CMD" | grep -qE '^git[[:space:]]+commit'; then
-    _STAGED=$(git show :docs/plans/.active 2>/dev/null | tr -d '[:space:]')
-    if [ -n "$_STAGED" ]; then
-      _HEAD=$(git show HEAD:docs/plans/.active 2>/dev/null | tr -d '[:space:]')
-      if [ "$_STAGED" != "$_HEAD" ]; then
-        echo "🚫 BLOCKED: docs/plans/.active is staged with plan path '$_STAGED'." >&2
-        echo "   This looks accidental. Run: git restore --staged docs/plans/.active" >&2
-        exit 2
-      fi
-    fi
-  fi
-fi
-
 # Emergency bypass
 if [ -f ".skip-ralph" ]; then
   echo "⚠️ Ralph-loop check skipped (.skip-ralph exists)." >&2

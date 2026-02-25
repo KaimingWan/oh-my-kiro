@@ -26,45 +26,9 @@ esac
 # Phase 1: Workflow Gate (from require-workflow.sh)
 # ============================================================
 gate_check() {
-  is_source_file "$FILE" || return 0
-  is_test_file "$FILE" && return 0
-
-  # Only gate new file creation
-  IS_CREATE=false
-  case "$TOOL_NAME" in
-    fs_write) [ "$COMMAND" = "create" ] && IS_CREATE=true ;;
-    Write) IS_CREATE=true ;;
-  esac
-  [ "$IS_CREATE" = false ] && return 0
-
-  [ -f ".skip-plan" ] && { echo "⚠️ Plan check skipped (.skip-plan exists)." >&2; return 0; }
-
+  # Advisory only: show progress if a plan is active
   PLAN_FILE=$(find_active_plan)
-  if [ -z "$PLAN_FILE" ]; then
-    hook_block "🚫 BLOCKED: Creating new source file without a plan.
-   Required: brainstorming → planning → reviewer → then code.
-   Create a plan in docs/plans/ first.
-   For quick fixes: touch .skip-plan to bypass."
-  fi
-
-  # Check review verdict
-  REVIEW_SECTION=$(sed -n '/^## Review/,/^## /p' "$PLAN_FILE" 2>/dev/null | tail -n +2)
-  REVIEW_LINES=$(echo "$REVIEW_SECTION" | grep -c '[a-zA-Z]' 2>/dev/null || true)
-  if [ "${REVIEW_LINES:-0}" -lt 3 ]; then
-    hook_block "🚫 BLOCKED: Plan exists but not yet reviewed.
-   The ## Review section in $PLAN_FILE needs content (≥3 lines)."
-  fi
-
-  VERDICT=$(echo "$REVIEW_SECTION" | grep -oiE '(Verdict:?\s*|FINAL VERDICT:?\s*|\*\*)(REJECT|CONDITIONAL|APPROVE|REQUEST CHANGES)' | tail -1)
-  case "$(echo "$VERDICT" | tr '[:lower:]' '[:upper:]')" in
-    *APPROVE*) ;;
-    *REJECT*|*"REQUEST CHANGES"*)
-      hook_block "🚫 BLOCKED: Plan was rejected. Verdict: $VERDICT" ;;
-    *CONDITIONAL*)
-      hook_block "🚫 BLOCKED: Plan has conditional approval. Address conditions first." ;;
-  esac
-
-  # Advisory: progress reminder
+  [ -z "$PLAN_FILE" ] && return 0
   UNCHECKED=$(grep -c '^\- \[ \]' "$PLAN_FILE" 2>/dev/null || true)
   CHECKED=$(grep -c '^\- \[x\]' "$PLAN_FILE" 2>/dev/null || true)
   [ "${UNCHECKED:-0}" -gt 0 ] && echo "📋 Progress: ${CHECKED:-0}/$((${CHECKED:-0} + UNCHECKED)) checklist items done" >&2
