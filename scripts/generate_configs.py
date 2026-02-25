@@ -572,6 +572,17 @@ def main(argv: list[str] | None = None) -> int:
         write_md(path, content)
         print(f"  ✅ {path.relative_to(PROJECT_ROOT)}")
 
+    # CC skill files (commands with $ARGUMENTS support)
+    skills_src = SCRIPT_ROOT / "skills"
+    if skills_src.is_dir():
+        skills_dst = PROJECT_ROOT / ".claude" / "skills"
+        for skill_dir in sorted(skills_src.iterdir()):
+            if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists():
+                dst = skills_dst / skill_dir.name / "SKILL.md"
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                dst.write_text((skill_dir / "SKILL.md").read_text())
+                print(f"  ✅ {dst.relative_to(PROJECT_ROOT)}")
+
     if errors:
         print(f"\n❌ {errors} config(s) have invalid JSON!")
         return 1

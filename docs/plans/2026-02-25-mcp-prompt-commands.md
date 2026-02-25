@@ -321,9 +321,9 @@ Round 2: Goal Alignment APPROVE + Verify Correctness APPROVE.
 - [x] `commands/reflect.md` 已删除 | `! test -f commands/reflect.md && echo PASS`
 - [x] MCP server 脚本存在 | `test -f scripts/mcp-prompts.py && python3 -c "import ast; ast.parse(open('scripts/mcp-prompts.py').read())" && echo PASS`
 - [x] mcp.json 包含 o server | `jq -e '.mcpServers.o.command' .kiro/settings/mcp.json | grep -q python3 && echo PASS`
-- [ ] generate_configs.py 包含 skill 生成 | `grep -q "CC skill files" scripts/generate_configs.py && echo PASS`
-- [ ] sync-omcc.sh 包含 MCP 注册 | `grep -q "mcp-prompts" tools/sync-omcc.sh && echo PASS`
-- [ ] AGENTS.md 包含新命令 | `grep -q '@o/agent' AGENTS.md && grep -q '@o/know' AGENTS.md && echo PASS`
+- [x] generate_configs.py 包含 skill 生成 | `grep -q "CC skill files" scripts/generate_configs.py && echo PASS`
+- [x] sync-omcc.sh 包含 MCP 注册 | `grep -q "mcp-prompts" tools/sync-omcc.sh && echo PASS`
+- [x] AGENTS.md 包含新命令 | `grep -q '@o/agent' AGENTS.md && grep -q '@o/know' AGENTS.md && echo PASS`
 - [ ] 回归测试通过 | `python3 -m pytest tests/ -v --timeout=30; test $? -eq 0 && echo PASS`
 
 ## Errors

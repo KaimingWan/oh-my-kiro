@@ -126,6 +126,17 @@ else
   info "Step 3.9: mcp.json source or .kiro/settings/ not found, skipping"
 fi
 
+# ─── Step 3.9b: Ensure 'o' MCP prompt server is registered ───────────────────
+MCP_JSON="$PROJECT_ROOT/.kiro/settings/mcp.json"
+if command -v jq &>/dev/null && [ -f "$MCP_JSON" ]; then
+  if ! jq -e '.mcpServers.o' "$MCP_JSON" &>/dev/null; then
+    jq '.mcpServers.o = {"command": "python3", "args": ["scripts/mcp-prompts.py"]}' "$MCP_JSON" > "${MCP_JSON}.tmp" && mv "${MCP_JSON}.tmp" "$MCP_JSON"
+    ok "Step 3.9b: 'o' MCP server registered in mcp.json"
+  else
+    info "Step 3.9b: 'o' MCP server already in mcp.json"
+  fi
+fi
+
 # ─── Step 3.10: Sync .kiro/rules/ framework files ────────────────────────────
 # Copy OMCC's .kiro/rules/ files to project, skip files that already exist
 # (project-customized files take precedence)

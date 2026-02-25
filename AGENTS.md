@@ -46,6 +46,8 @@
 | 完成前验证 | verification | Stop hook 自动 | 按需读取 |
 | 分支收尾 | finishing | planning 完成后 | 按需读取 |
 | 纠正/学习 | self-reflect | context-enrichment 检测 | 按需读取 |
+| 沉淀纲领 | agent (CC skill / MCP prompt) | `/agent` or `@o/agent` | 按需读取 |
+| 沉淀知识 | know (CC skill / MCP prompt) | `/know` or `@o/know` | 按需读取 |
 | 发现 skill | find-skills | 用户询问时 | 按需读取 |
 
 ## Knowledge Retrieval
