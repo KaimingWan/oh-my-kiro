@@ -13,3 +13,10 @@
 - **Files changed:** `hooks/gate/pre-write.sh`
 - **Learnings:** gate_check() had find_active_plan → block + review verdict check. Replaced entire body with advisory-only progress display. The checklist check-off gate hashes verify commands with `echo | shasum` (includes trailing newline) — must match when logging hashes programmatically.
 - **Status:** done
+
+## Iteration 3 — 2026-02-26T00:49
+
+- **Task:** Verify creating non-plan file with active plan is not blocked
+- **Files changed:** none (already covered by item 2's gate_check change)
+- **Learnings:** The gate_check simplification from item 2 inherently covers this case — no plan-requirement means no blocking regardless of plan state.
+- **Status:** done
