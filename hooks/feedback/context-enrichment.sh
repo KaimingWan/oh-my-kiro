@@ -202,4 +202,6 @@ if [ -n "$OUTPUT" ]; then
   fi
 fi
 
+run_project_extensions
+
 exit 0

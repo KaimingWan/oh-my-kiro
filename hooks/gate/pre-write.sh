@@ -221,5 +221,6 @@ gate_plan_structure
 gate_checklist
 scan_content
 inject_plan_context || true
+run_project_extensions
 
 exit 0

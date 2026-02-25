@@ -40,6 +40,15 @@ is_test_file() {
   echo "$1" | grep -qiE '(test|spec|__test__)'
 }
 
+# Run project-specific extension for the calling hook.
+# Usage: call at end of any hook script.
+# Looks for hooks/project/<caller-basename>-ext.sh
+run_project_extensions() {
+  local caller="${1:-$(basename "${BASH_SOURCE[1]}" .sh)}"
+  local ext="hooks/project/${caller}-ext.sh"
+  [ -f "$ext" ] && source "$ext"
+}
+
 find_active_plan() {
   # Priority 1: explicit .active pointer
   if [ -f "docs/plans/.active" ]; then
