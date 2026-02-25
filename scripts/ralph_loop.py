@@ -253,7 +253,7 @@ def main():
     if not skip_dirty_check:
         r = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
         if r.stdout.strip():
-            die("Dirty working tree. Commit or stash changes before running ralph-loop.")
+            print("⚠️ Dirty working tree detected. Proceeding anyway (use RALPH_SKIP_DIRTY_CHECK=1 to silence).")
 
     # --- Verify checklist exists ---
     plan = validate_plan(plan_path)

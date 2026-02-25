@@ -20,3 +20,10 @@
 - **Files changed:** none (already covered by item 2's gate_check change)
 - **Learnings:** The gate_check simplification from item 2 inherently covers this case — no plan-requirement means no blocking regardless of plan state.
 - **Status:** done
+
+## Iteration 4 — 2026-02-26T00:50
+
+- **Task:** Soften ralph_loop.py dirty check from die() to warning
+- **Files changed:** `scripts/ralph_loop.py`
+- **Learnings:** Single line change: `die("Dirty working tree...")` → `print("⚠️ Dirty working tree detected. Proceeding anyway...")`. Keeps the RALPH_SKIP_DIRTY_CHECK env var as a way to silence the warning.
+- **Status:** done
