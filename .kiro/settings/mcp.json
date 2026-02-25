@@ -3,6 +3,10 @@
     "ripgrep": {
       "command": "npx",
       "args": ["-y", "mcp-ripgrep@latest"]
+    },
+    "o": {
+      "command": "python3",
+      "args": ["scripts/mcp-prompts.py"]
     }
   }
 }

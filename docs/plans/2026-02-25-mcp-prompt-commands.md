@@ -316,11 +316,11 @@ Round 2: Goal Alignment APPROVE + Verify Correctness APPROVE.
 
 ## Checklist
 
-- [ ] CC skill `agent` 存在且包含 $ARGUMENTS | `test -f .claude/skills/agent/SKILL.md && grep -q 'ARGUMENTS' .claude/skills/agent/SKILL.md && echo PASS`
-- [ ] CC skill `know` 存在且包含 $ARGUMENTS | `test -f .claude/skills/know/SKILL.md && grep -q 'ARGUMENTS' .claude/skills/know/SKILL.md && echo PASS`
-- [ ] `commands/reflect.md` 已删除 | `! test -f commands/reflect.md && echo PASS`
-- [ ] MCP server 脚本存在 | `test -f scripts/mcp-prompts.py && python3 -c "import ast; ast.parse(open('scripts/mcp-prompts.py').read())" && echo PASS`
-- [ ] mcp.json 包含 o server | `jq -e '.mcpServers.o.command' .kiro/settings/mcp.json | grep -q python3 && echo PASS`
+- [x] CC skill `agent` 存在且包含 $ARGUMENTS | `test -f .claude/skills/agent/SKILL.md && grep -q 'ARGUMENTS' .claude/skills/agent/SKILL.md && echo PASS`
+- [x] CC skill `know` 存在且包含 $ARGUMENTS | `test -f .claude/skills/know/SKILL.md && grep -q 'ARGUMENTS' .claude/skills/know/SKILL.md && echo PASS`
+- [x] `commands/reflect.md` 已删除 | `! test -f commands/reflect.md && echo PASS`
+- [x] MCP server 脚本存在 | `test -f scripts/mcp-prompts.py && python3 -c "import ast; ast.parse(open('scripts/mcp-prompts.py').read())" && echo PASS`
+- [x] mcp.json 包含 o server | `jq -e '.mcpServers.o.command' .kiro/settings/mcp.json | grep -q python3 && echo PASS`
 - [ ] generate_configs.py 包含 skill 生成 | `grep -q "CC skill files" scripts/generate_configs.py && echo PASS`
 - [ ] sync-omcc.sh 包含 MCP 注册 | `grep -q "mcp-prompts" tools/sync-omcc.sh && echo PASS`
 - [ ] AGENTS.md 包含新命令 | `grep -q '@o/agent' AGENTS.md && grep -q '@o/know' AGENTS.md && echo PASS`

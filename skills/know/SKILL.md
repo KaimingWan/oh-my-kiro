@@ -1,9 +1,19 @@
-# Reflect — Manual Knowledge Capture
+---
+name: know
+description: "Capture knowledge into episodes.md. Use when preserving insights, lessons learned, or corrections from the current conversation."
+argument-hint: "[insight to capture]"
+disable-model-invocation: true
+---
 
-Read the current conversation and identify insights worth preserving.
+# Know — Knowledge Capture
+
+Read the current conversation and capture an insight into knowledge/episodes.md.
+
+## Input
+$ARGUMENTS
 
 ## Process
-1. Ask user: "What insight should I capture?" (or user already stated it)
+1. If no input provided, ask user: "What insight should I capture?"
 2. Extract: trigger scenario + DO/DON'T action + keywords
 3. Check dedup: grep -iw keywords in knowledge/rules.md and knowledge/episodes.md
    - Already in rules → tell user, skip
@@ -13,7 +23,6 @@ Read the current conversation and identify insights worth preserving.
 6. Output: 📝 Captured → episodes.md: 'SUMMARY'
 
 ## Rules
-- @reflect only writes to episodes.md (promotion to rules.md is done by self-reflect skill, not @reflect)
 - Summary must contain actionable DO/DON'T, not narrative
 - Keywords: 1-3 english technical terms, ≥4 chars each, comma-separated
 - If episodes.md has ≥30 entries, warn user to clean up first
