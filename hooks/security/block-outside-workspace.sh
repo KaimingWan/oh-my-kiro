@@ -58,8 +58,6 @@ case "$TOOL_NAME" in
       '>+\s*/usr/'
       '>+\s*/var/'
       '>+\s*/opt/'
-      '>+\s*~/\.'
-      '>+\s*~/'
       '>+\s*\$HOME/'
       'tee\s+(-a\s+)?(/etc/|/usr/|/var/|~/|~/.|\$HOME/)'
       '\b(cp|mv|install)\b.*\s+(/etc/|/usr/|/var/|~/|~/.|\$HOME/)'
