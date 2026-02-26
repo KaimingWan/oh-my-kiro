@@ -270,22 +270,22 @@ Expected: ALL PASS
 
 ## Checklist
 
-- [ ] slug derived from plan pointer filename | `python3 -c "from scripts.ralph_loop import parse_config; import os; os.environ['PLAN_POINTER_OVERRIDE']='docs/plans/2026-02-26-sitebox-feat.md'; c=parse_config(); assert c.instance_slug=='2026-02-26-sitebox-feat', c.instance_slug; print('OK')"`
-- [ ] default plan pointer produces empty slug | `python3 -c "from scripts.ralph_loop import parse_config; c=parse_config(); assert c.instance_slug=='', c.instance_slug; print('OK')"`
-- [ ] instance_path isolates lock file | `python3 -c "from scripts.ralph_loop import parse_config; import os; os.environ['PLAN_POINTER_OVERRIDE']='docs/plans/foo.md'; c=parse_config(); assert str(c.instance_path('.ralph-loop.lock'))=='.ralph-loop-foo.lock', str(c.instance_path('.ralph-loop.lock')); print('OK')"`
-- [ ] instance_path returns default when no slug | `python3 -c "from scripts.ralph_loop import parse_config; import os; os.environ.pop('PLAN_POINTER_OVERRIDE',None); c=parse_config(); assert str(c.instance_path('.ralph-loop.lock'))=='.ralph-loop.lock'; print('OK')"`
-- [ ] RALPH_WORK_DIR parsed into config | `python3 -c "from scripts.ralph_loop import parse_config; import os; os.environ['RALPH_WORK_DIR']='/tmp/wt'; c=parse_config(); assert c.work_dir=='/tmp/wt'; print('OK')"`
-- [ ] pty_run accepts cwd param | `python3 -c "import inspect; from scripts.lib.pty_runner import pty_run; sig=inspect.signature(pty_run); assert 'cwd' in sig.parameters; print('OK')"`
-- [ ] prompt includes work_dir when set | `python3 -c "from scripts.ralph_loop import build_prompt; from scripts.lib.plan import PlanFile; from pathlib import Path; Path('/tmp/_test_plan.md').write_text('## Checklist\n- [ ] test'); p=PlanFile(Path('/tmp/_test_plan.md')); s=build_prompt(1,p,Path('/tmp/_test_plan.md'),Path('.'),work_dir='/tmp/wt'); assert 'Working directory: /tmp/wt' in s; print('OK')"`
-- [ ] prompt has no work_dir line when unset | `python3 -c "from scripts.ralph_loop import build_prompt; from scripts.lib.plan import PlanFile; from pathlib import Path; import inspect; sig=inspect.signature(build_prompt); assert 'work_dir' in sig.parameters, 'work_dir param missing'; Path('/tmp/_test_plan.md').write_text('## Checklist\n- [ ] test'); p=PlanFile(Path('/tmp/_test_plan.md')); s=build_prompt(1,p,Path('/tmp/_test_plan.md'),Path('.'),work_dir=''); assert 'Working directory' not in s; print('OK')"`
-- [ ] hook blocks write outside work_dir | `RALPH_WORK_DIR=/tmp/test-wt _RALPH_LOOP_RUNNING=1 echo '{"tool_name":"fs_write","tool_input":{"file_path":"/tmp/other/evil.py"}}' | bash hooks/gate/enforce-work-dir.sh 2>&1; test $? -eq 2`
-- [ ] hook allows write inside work_dir | `RALPH_WORK_DIR=/tmp/test-wt _RALPH_LOOP_RUNNING=1 echo '{"tool_name":"fs_write","tool_input":{"file_path":"/tmp/test-wt/good.py"}}' | bash hooks/gate/enforce-work-dir.sh 2>&1; test $? -eq 0`
-- [ ] hook inactive when RALPH_WORK_DIR unset | `echo '{"tool_name":"fs_write","tool_input":{"file_path":"/tmp/anywhere.py"}}' | bash hooks/gate/enforce-work-dir.sh 2>&1; test $? -eq 0`
-- [ ] hook inactive outside ralph loop | `RALPH_WORK_DIR=/tmp/test-wt echo '{"tool_name":"fs_write","tool_input":{"file_path":"/tmp/other/evil.py"}}' | bash hooks/gate/enforce-work-dir.sh 2>&1; test $? -eq 0`
-- [ ] context-enrichment emits work_dir for @execute | `echo '{"prompt":"@execute"}' | PLAN_FILE_FOR_TEST=1 bash hooks/feedback/context-enrichment.sh 2>/dev/null | grep -q 'RALPH_WORK_DIR\|ralph_loop'`
-- [ ] execute.md documents Work Dir flow | `grep -q 'Work Dir' commands/execute.md`
-- [ ] enforce-work-dir.sh registered in hook config | `cat .kiro/agents/pilot.json | grep -q 'enforce-work-dir'`
-- [ ] 回归测试通过 | `python3 -m pytest tests/ralph-loop/ -v`
+- [x] slug derived from plan pointer filename | `python3 -c "from scripts.ralph_loop import parse_config; import os; os.environ['PLAN_POINTER_OVERRIDE']='docs/plans/2026-02-26-sitebox-feat.md'; c=parse_config(); assert c.instance_slug=='2026-02-26-sitebox-feat', c.instance_slug; print('OK')"`
+- [x] default plan pointer produces empty slug | `python3 -c "from scripts.ralph_loop import parse_config; c=parse_config(); assert c.instance_slug=='', c.instance_slug; print('OK')"`
+- [x] instance_path isolates lock file | `python3 -c "from scripts.ralph_loop import parse_config; import os; os.environ['PLAN_POINTER_OVERRIDE']='docs/plans/foo.md'; c=parse_config(); assert str(c.instance_path('.ralph-loop.lock'))=='.ralph-loop-foo.lock', str(c.instance_path('.ralph-loop.lock')); print('OK')"`
+- [x] instance_path returns default when no slug | `python3 -c "from scripts.ralph_loop import parse_config; import os; os.environ.pop('PLAN_POINTER_OVERRIDE',None); c=parse_config(); assert str(c.instance_path('.ralph-loop.lock'))=='.ralph-loop.lock'; print('OK')"`
+- [x] RALPH_WORK_DIR parsed into config | `python3 -c "from scripts.ralph_loop import parse_config; import os; os.environ['RALPH_WORK_DIR']='/tmp/wt'; c=parse_config(); assert c.work_dir=='/tmp/wt'; print('OK')"`
+- [x] pty_run accepts cwd param | `python3 -c "import inspect; from scripts.lib.pty_runner import pty_run; sig=inspect.signature(pty_run); assert 'cwd' in sig.parameters; print('OK')"`
+- [x] prompt includes work_dir when set | `python3 -c "from scripts.ralph_loop import build_prompt; from scripts.lib.plan import PlanFile; from pathlib import Path; Path('/tmp/_test_plan.md').write_text('## Checklist\n- [ ] test'); p=PlanFile(Path('/tmp/_test_plan.md')); s=build_prompt(1,p,Path('/tmp/_test_plan.md'),Path('.'),work_dir='/tmp/wt'); assert 'Working directory: /tmp/wt' in s; print('OK')"`
+- [x] prompt has no work_dir line when unset | `python3 -c "from scripts.ralph_loop import build_prompt; from scripts.lib.plan import PlanFile; from pathlib import Path; import inspect; sig=inspect.signature(build_prompt); assert 'work_dir' in sig.parameters, 'work_dir param missing'; Path('/tmp/_test_plan.md').write_text('## Checklist\n- [ ] test'); p=PlanFile(Path('/tmp/_test_plan.md')); s=build_prompt(1,p,Path('/tmp/_test_plan.md'),Path('.'),work_dir=''); assert 'Working directory' not in s; print('OK')"`
+- [x] hook blocks write outside work_dir | `bash -c 'export RALPH_WORK_DIR=/tmp/test-wt _RALPH_LOOP_RUNNING=1; echo '"'"'{"tool_name":"fs_write","tool_input":{"file_path":"/tmp/other/evil.py"}}'"'"' | bash hooks/gate/enforce-work-dir.sh 2>&1; test $? -eq 2'`
+- [x] hook allows write inside work_dir | `bash -c 'export RALPH_WORK_DIR=/tmp/test-wt _RALPH_LOOP_RUNNING=1; echo '"'"'{"tool_name":"fs_write","tool_input":{"file_path":"/tmp/test-wt/good.py"}}'"'"' | bash hooks/gate/enforce-work-dir.sh 2>&1; test $? -eq 0'`
+- [x] hook inactive when RALPH_WORK_DIR unset | `bash -c 'unset RALPH_WORK_DIR _RALPH_LOOP_RUNNING; echo '"'"'{"tool_name":"fs_write","tool_input":{"file_path":"/tmp/anywhere.py"}}'"'"' | bash hooks/gate/enforce-work-dir.sh 2>&1; test $? -eq 0'`
+- [x] hook inactive outside ralph loop | `bash -c 'export RALPH_WORK_DIR=/tmp/test-wt; unset _RALPH_LOOP_RUNNING; echo '"'"'{"tool_name":"fs_write","tool_input":{"file_path":"/tmp/other/evil.py"}}'"'"' | bash hooks/gate/enforce-work-dir.sh 2>&1; test $? -eq 0'`
+- [x] context-enrichment emits work_dir for @execute | `bash -c 'WS_HASH=$(pwd | shasum 2>/dev/null | cut -c1-8); echo 0 > /tmp/ctx-enrich-${WS_HASH}.ts; echo '"'"'{"prompt":"@execute"}'"'"' | bash hooks/feedback/context-enrichment.sh 2>/dev/null | grep -q "ralph_loop"'`
+- [x] execute.md documents Work Dir flow | `grep -q 'Work Dir' commands/execute.md`
+- [x] enforce-work-dir.sh registered in hook config | `cat .kiro/agents/pilot.json | grep -q 'enforce-work-dir'`
+- [x] 回归测试通过 | `python3 -m pytest tests/ralph-loop/ -v`
 
 ## Errors
 

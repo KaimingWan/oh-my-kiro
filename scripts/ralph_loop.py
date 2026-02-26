@@ -110,7 +110,8 @@ def write_summary(exit_code: int, plan: PlanFile, plan_path: Path, summary_file:
 
 # --- Build prompt ---
 def build_prompt(iteration: int, plan: PlanFile, plan_path: Path, project_root: Path,
-                 skip_precheck: str = "", prev_exit: int = -1, is_first: bool = False) -> str:
+                 skip_precheck: str = "", prev_exit: int = -1, is_first: bool = False,
+                 work_dir: str = "") -> str:
     plan.reload()
     progress_file = plan.progress_path
     findings_file = plan.findings_path
@@ -132,6 +133,14 @@ def build_prompt(iteration: int, plan: PlanFile, plan_path: Path, project_root: 
         header = "You are executing a plan."
         pre_items = ""
 
+    work_dir_section = ""
+    if work_dir:
+        work_dir_section = f"""
+Working directory: {work_dir}
+You MUST work in this directory. All file edits, test runs, and git commits happen here.
+The plan file is in the parent project — read it but do NOT modify files outside your working directory.
+"""
+
     return f"""{header}
 
 Read these files first:
@@ -140,7 +149,7 @@ Read these files first:
 3. Findings: {findings_file} (if exists — contains research discoveries and decisions)
 
 Environment: {env_status}
-
+{work_dir_section}
 {pre_items + chr(10) if pre_items else ""}Next unchecked items:
 {next_items}
 
@@ -175,16 +184,29 @@ class Config:
     skip_dirty_check: str = ""
     skip_precheck: str = ""
     plan_pointer: Path | None = None
+    instance_slug: str = ""
+    work_dir: str = ""
 
     def __post_init__(self):
         if self.plan_pointer is None:
             self.plan_pointer = Path("docs/plans/.active")
+
+    def instance_path(self, base: str) -> Path:
+        """Return instance-isolated path. E.g. '.ralph-loop.lock' → '.ralph-loop-{slug}.lock'."""
+        if not self.instance_slug:
+            return Path(base)
+        p = Path(base)
+        stem, suffix = p.stem, p.suffix
+        return p.with_name(f"{stem}-{self.instance_slug}{suffix}")
 
 
 def parse_config(argv: list[str] | None = None) -> Config:
     """Parse configuration from argv and environment variables."""
     argv = argv or []
     max_iter = int(argv[0]) if argv else 10
+    plan_pointer = Path(os.environ.get("PLAN_POINTER_OVERRIDE", "docs/plans/.active"))
+    # Derive instance slug: non-default pointer → filename stem; default (.active) → empty
+    slug = "" if plan_pointer.name == ".active" else plan_pointer.stem
     return Config(
         max_iterations=max_iter,
         task_timeout=int(os.environ.get("RALPH_TASK_TIMEOUT", "1800")),
@@ -192,7 +214,9 @@ def parse_config(argv: list[str] | None = None) -> Config:
         heartbeat_interval=int(os.environ.get("RALPH_HEARTBEAT_INTERVAL", "60")),
         skip_dirty_check=os.environ.get("RALPH_SKIP_DIRTY_CHECK", ""),
         skip_precheck=os.environ.get("RALPH_SKIP_PRECHECK", ""),
-        plan_pointer=Path(os.environ.get("PLAN_POINTER_OVERRIDE", "docs/plans/.active")),
+        plan_pointer=plan_pointer,
+        instance_slug=slug,
+        work_dir=os.environ.get("RALPH_WORK_DIR", ""),
     )
 
 

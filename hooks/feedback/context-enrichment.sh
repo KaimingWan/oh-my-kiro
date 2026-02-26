@@ -42,7 +42,19 @@ fi
 
 # @execute command — force ralph loop
 if echo "$USER_MSG" | grep -qE '^@execute|^/execute'; then
-  emit "🚀 Execute detected → Run \`python3 scripts/ralph_loop.py\` immediately. Do NOT read the plan or implement tasks yourself."
+  PLAN_POINTER="docs/plans/.active"
+  WORK_DIR=""
+  if [ -f "$PLAN_POINTER" ]; then
+    PLAN_FILE=$(cat "$PLAN_POINTER" | tr -d '[:space:]')
+    if [ -n "$PLAN_FILE" ] && [ -f "$PLAN_FILE" ]; then
+      WORK_DIR=$(grep -oE '^\*\*Work Dir:\*\*\s*.+' "$PLAN_FILE" 2>/dev/null | sed 's/^\*\*Work Dir:\*\*\s*//' | tr -d '[:space:]')
+    fi
+  fi
+  if [ -n "$WORK_DIR" ]; then
+    emit "🚀 Execute detected → Plan has Work Dir: $WORK_DIR. Create worktree if needed, then run: PLAN_POINTER_OVERRIDE=$PLAN_FILE RALPH_WORK_DIR=$WORK_DIR python3 scripts/ralph_loop.py"
+  else
+    emit "🚀 Execute detected → Run \`python3 scripts/ralph_loop.py\` immediately. Do NOT read the plan or implement tasks yourself."
+  fi
 fi
 
 # Unfinished task resume

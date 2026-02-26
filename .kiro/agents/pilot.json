@@ -48,6 +48,10 @@
       },
       {
         "matcher": "fs_write",
+        "command": "hooks/gate/enforce-work-dir.sh"
+      },
+      {
+        "matcher": "fs_write",
         "command": "hooks/gate/pre-write.sh"
       },
       {

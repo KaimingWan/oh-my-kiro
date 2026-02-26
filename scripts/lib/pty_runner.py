@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Callable
 
 
-def pty_run(cmd: list[str], log_path: Path) -> tuple[subprocess.Popen, Callable]:
+def pty_run(cmd: list[str], log_path: Path, cwd: str | None = None) -> tuple[subprocess.Popen, Callable]:
     """Launch cmd with stdout/stderr on a PTY, tee output to log_path.
 
     Returns (proc, stop_fn). Call stop_fn() after proc.wait() to join reader thread.
@@ -15,7 +15,7 @@ def pty_run(cmd: list[str], log_path: Path) -> tuple[subprocess.Popen, Callable]
     master, slave = pty.openpty()
     proc = subprocess.Popen(
         cmd, stdin=slave, stdout=slave, stderr=subprocess.STDOUT,
-        start_new_session=True, close_fds=True,
+        start_new_session=True, close_fds=True, cwd=cwd,
     )
     os.close(slave)
 

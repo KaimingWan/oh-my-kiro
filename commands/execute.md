@@ -9,6 +9,23 @@ Resolve which plan to execute:
 
 Verify the plan has reviewer APPROVE verdict. If not approved, tell the user to run @plan first.
 
+## Step 1b: Detect Work Dir
+
+Check if the plan header contains `**Work Dir:**`:
+```bash
+WORK_DIR=$(grep -oE '^\*\*Work Dir:\*\*\s*.+' "$PLAN_FILE" | sed 's/^\*\*Work Dir:\*\*\s*//' | tr -d '[:space:]')
+```
+
+If Work Dir is set:
+1. Resolve to absolute path relative to project root
+2. If path doesn't exist, create worktree (infer submodule and branch from plan slug)
+3. Launch ralph loop with isolation env vars:
+```bash
+PLAN_POINTER_OVERRIDE=<plan_file_path> RALPH_WORK_DIR=<work_dir_abs> python3 scripts/ralph_loop.py
+```
+
+If Work Dir is absent, proceed normally (backward compatible).
+
 ## Step 2: Verify Checklist
 
 The plan MUST contain a `## Checklist` section with at least one `- [ ]` item. If missing, STOP and tell the user the plan needs a checklist.
