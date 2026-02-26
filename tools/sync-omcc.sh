@@ -112,29 +112,22 @@ fi
 mkdir -p "$PROJECT_ROOT/docs/plans"
 info "Step 3.8: docs/plans/ ensured"
 
-# ─── Step 3.9: Sync .kiro/settings/mcp.json ──────────────────────────────────
+# ─── Step 3.9: Sync .kiro/settings/mcp.json (jq merge) ───────────────────────
 OMCC_MCP="$OMCC_ROOT/.kiro/settings/mcp.json"
 PROJECT_MCP="$PROJECT_ROOT/.kiro/settings/mcp.json"
-if [ -f "$OMCC_MCP" ] && [ -d "$PROJECT_ROOT/.kiro/settings" ]; then
+if [ -f "$OMCC_MCP" ]; then
   if [ ! -f "$PROJECT_MCP" ]; then
+    mkdir -p "$(dirname "$PROJECT_MCP")"
     cp "$OMCC_MCP" "$PROJECT_MCP"
-    ok "Step 3.9: .kiro/settings/mcp.json copied from OMCC"
+    ok "Step 3.9: .kiro/settings/mcp.json copied from OMCC (first-time sync)"
+  elif command -v jq &>/dev/null; then
+    jq -s '{"mcpServers": (.[0].mcpServers * .[1].mcpServers)}' "$PROJECT_MCP" "$OMCC_MCP" > "${PROJECT_MCP}.tmp" && mv "${PROJECT_MCP}.tmp" "$PROJECT_MCP"
+    ok "Step 3.9: .kiro/settings/mcp.json merged (OMCC servers updated, project-custom preserved)"
   else
-    info "Step 3.9: .kiro/settings/mcp.json already exists, skipping"
+    info "Step 3.9: jq not available, skipping mcp.json merge"
   fi
 else
-  info "Step 3.9: mcp.json source or .kiro/settings/ not found, skipping"
-fi
-
-# ─── Step 3.9b: Ensure 'o' MCP prompt server is registered ───────────────────
-MCP_JSON="$PROJECT_ROOT/.kiro/settings/mcp.json"
-if command -v jq &>/dev/null && [ -f "$MCP_JSON" ]; then
-  if ! jq -e '.mcpServers.o' "$MCP_JSON" &>/dev/null; then
-    jq '.mcpServers.o = {"command": "python3", "args": ["scripts/mcp-prompts.py"]}' "$MCP_JSON" > "${MCP_JSON}.tmp" && mv "${MCP_JSON}.tmp" "$MCP_JSON"
-    ok "Step 3.9b: 'o' MCP server registered in mcp.json"
-  else
-    info "Step 3.9b: 'o' MCP server already in mcp.json"
-  fi
+  info "Step 3.9: OMCC mcp.json not found, skipping"
 fi
 
 # ─── Step 3.10: Sync .kiro/rules/ framework files ────────────────────────────

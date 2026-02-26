@@ -34,12 +34,16 @@ All 4 reviewers: REQUEST CHANGES. Issues found and fixed:
 3. ~~Missing `.kiro/settings/` directory creation~~ — added `mkdir -p` in copy fallback path.
 4. ~~Checklist item 4 tested source file not generate_configs.py output~~ — removed invalid checklist item.
 
+### Round 2 (2 reviewers: Goal Alignment, Verify Correctness)
+
+Both reviewers: **APPROVE**. All Round 1 issues verified as fixed.
+
 ## Checklist
-- [ ] mcp.json merge: OMCC servers merged into project, project-custom servers preserved | `bash tests/sync-omcc/test_mcp_sync.sh`
-- [ ] o server uses uvx after sync | `bash tests/sync-omcc/test_mcp_sync.sh`
-- [ ] existing bare-python3 o server upgraded to uvx after sync | `bash tests/sync-omcc/test_mcp_sync.sh`
-- [ ] first-time sync (no project mcp.json) works | `bash tests/sync-omcc/test_mcp_sync.sh`
-- [ ] source mcp.json updated to uvx | `jq -r '.mcpServers.o.command' .kiro/settings/mcp.json | grep -q uvx`
+- [x] mcp.json merge: OMCC servers merged into project, project-custom servers preserved | `bash tests/sync-omcc/test_mcp_sync.sh`
+- [x] o server uses uvx after sync | `bash tests/sync-omcc/test_mcp_sync.sh`
+- [x] existing bare-python3 o server upgraded to uvx after sync | `bash tests/sync-omcc/test_mcp_sync.sh`
+- [x] first-time sync (no project mcp.json) works | `bash tests/sync-omcc/test_mcp_sync.sh`
+- [x] source mcp.json updated to uvx | `jq -r '.mcpServers.o.command' .kiro/settings/mcp.json | grep -q uvx`
 
 ## Errors
 

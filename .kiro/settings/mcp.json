@@ -5,8 +5,8 @@
       "args": ["-y", "mcp-ripgrep@latest"]
     },
     "o": {
-      "command": "python3",
-      "args": ["scripts/mcp-prompts.py"]
+      "command": "uvx",
+      "args": ["--with", "mcp[cli]", "python3", "scripts/mcp-prompts.py"]
     }
   }
 }
