@@ -1,3 +1,4 @@
+from __future__ import annotations
 #!/usr/bin/env python3
 """ralph_loop.py — Kiro CLI wrapper with Ralph Loop discipline.
 
@@ -155,18 +156,21 @@ Environment: {env_status}
 
 Rules:
 1. Implement the FIRST unchecked item. Verify it works (run tests/typecheck).
-2. Update the plan: change that item from '- [ ]' to '- [x]'.
-3. Append to {progress_file} with format:
+2. If the checklist item has an inline verify command (format: `| \`cmd\``), run it. Only mark `- [x]` if the verify command exits 0. If no verify command, manually confirm the task is done before marking.
+3. IMPORTANT: The unchecked item may reference work defined in an earlier Phase. Read the FULL Phase section containing that item (including code blocks) before implementing. Do NOT just check the box — execute the implementation code first.
+4. Update the plan: change that item from '- [ ]' to '- [x]'.
+5. Append to {progress_file} with format:
    ## Iteration {iteration} — $(date)
    - **Task:** <what you did>
    - **Files changed:** <list>
    - **Learnings:** <gotchas, patterns discovered>
    - **Status:** done / skipped
-4. If you discover reusable patterns or make technical decisions, write to {findings_file}.
-5. Commit: feat: <item description>.
-6. Continue with next unchecked item. Do NOT stop while unchecked items remain.
-7. If stuck after 3 attempts, change item to '- [SKIP] <reason>' and move to next.
-8. If a command is blocked by a security hook, read the suggested alternative and retry with the safe command. If blocked 3+ times on the same item, mark it as '- [SKIP] blocked by security hook' and continue.
+6. If you discover reusable patterns or make technical decisions, write to {findings_file}.
+7. Commit: feat: <item description>.
+8. Continue with next unchecked item. Do NOT stop while unchecked items remain.
+9. If stuck after 3 attempts, change item to '- [SKIP] <reason>' and move to next.
+10. If a command is blocked by a security hook, read the suggested alternative and retry with the safe command. If blocked 3+ times on the same item, mark it as '- [SKIP] blocked by security hook' and continue.
+11. NEVER mark an item `- [x]` if the verify command fails or the implementation was not actually executed. If unsure, re-run the verify command.
 """
 
 
@@ -381,6 +385,14 @@ def main():
 
         if shutdown_flag[0]:
             break
+
+        # Post-iteration: verify inline commands and revert false [x] marks
+        plan.reload()
+        reverted = plan.revert_failed_checks(cwd=str(PROJECT_ROOT), timeout=120)
+        if reverted:
+            print(f"🔍 Reverted {len(reverted)} falsely checked items:", flush=True)
+            for idx, cmd in reverted:
+                print(f"   #{idx}: `{cmd}` failed", flush=True)
 
         # Early completion check — avoid wasting a full iteration
         plan.reload()

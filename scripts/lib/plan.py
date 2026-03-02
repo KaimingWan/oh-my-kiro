@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Plan file parser — reads markdown checklist state."""
 import re
 import subprocess
@@ -194,3 +195,37 @@ class PlanFile:
             self.path.write_text('\n'.join(lines))
             self.reload()
         return results
+
+    def revert_failed_checks(self, cwd: str = ".", timeout: int = 30) -> list[tuple[int, str]]:
+        """Revert [x] items back to [ ] if their inline verify command fails.
+
+        Returns list of (1-based checklist index, verify_cmd) for reverted items.
+        """
+        reverted: list[tuple[int, str]] = []
+        lines = self._text.split('\n')
+        item_idx = 0
+        dirty = False
+        for li, line in enumerate(lines):
+            if not _CHECKLIST_ITEM.match(line):
+                continue
+            item_idx += 1
+            if not line.startswith('- [x] '):
+                continue
+            m = _VERIFY_IN_ITEM.search(line)
+            if not m:
+                continue
+            vcmd = m.group(1)
+            try:
+                r = subprocess.run(vcmd, shell=True, capture_output=True, text=True,
+                                   timeout=timeout, cwd=cwd)
+                passed = r.returncode == 0
+            except Exception:
+                passed = False
+            if not passed:
+                lines[li] = line.replace('- [x] ', '- [ ] ', 1)
+                dirty = True
+                reverted.append((item_idx, vcmd))
+        if dirty:
+            self.path.write_text('\n'.join(lines))
+            self.reload()
+        return reverted
