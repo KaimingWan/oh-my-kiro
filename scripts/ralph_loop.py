@@ -1,5 +1,5 @@
-from __future__ import annotations
 #!/usr/bin/env python3
+from __future__ import annotations
 """ralph_loop.py — Kiro CLI wrapper with Ralph Loop discipline.
 
 Keeps restarting Kiro until all checklist items in the active plan are checked off.

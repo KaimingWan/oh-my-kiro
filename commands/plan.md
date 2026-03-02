@@ -7,11 +7,10 @@ Follow skills/planning/SKILL.md Phase 0 to build deep understanding of the goal.
 Read skills/planning/SKILL.md, then write a plan to docs/plans/<date>-<slug>.md. The plan MUST include: Goal, Steps with TDD structure, an empty ## Review section, and a ## Checklist section with all acceptance criteria as `- [ ]` items. The checklist is the contract — @execute will not proceed without it.
 
 ### Checklist Structure Rules (CRITICAL — Ralph Loop depends on these)
-1. **Every Phase MUST have its own `- [ ]` checklist items inline** — directly after the implementation code in that Phase. Do NOT collect all checklist items into a single final Phase.
-2. **Each checklist item MUST include an inline verify command** using the format: `- [ ] Description | \`verify_command\`` (e.g., `- [ ] OpenViking installed | \`ov --version\``). The verify command must return exit code 0 on success.
-3. **No Phase may contain only code blocks without checklist items.** If a Phase has implementation steps, it must have corresponding `- [ ]` items that Ralph Loop can track.
-4. **Checklist items must be actionable, not just observational.** Bad: `- [ ] System looks good`. Good: `- [ ] Gateway responds 200 | \`curl -sf http://127.0.0.1:8000/health\``.
-5. **A final "Integration Test" Phase is allowed** but it must only contain cross-Phase verification items, not repeat items that belong to earlier Phases.
+1. **All checklist items go in the `## Checklist` section** (as defined in SKILL.md). Do NOT scatter `- [ ]` items inline across Phases — Ralph Loop and hooks parse `## Checklist` as the single source of truth.
+2. **Each checklist item MUST include an inline verify command** using the format: `- [ ] Description | \`verify_command\`` (e.g., `- [ ] Gateway responds 200 | \`curl -sf http://127.0.0.1:8000/health\``). The verify command must return exit code 0 on success.
+3. **Checklist items must be actionable, not just observational.** Bad: `- [ ] System looks good`. Good: `- [ ] Config validated | \`python3 -c "import json; json.load(open('config.json'))"\``.
+4. **NEVER mark `- [x]` without running the verify command.** Ralph Loop's `revert_failed_checks()` will revert items whose verify commands fail.
 
 ## Step 3: Verify Checklist Exists
 Before dispatching reviewer, confirm the plan file contains a `## Checklist` section with at least one `- [ ]` item. If missing, add it NOW — do not proceed to review without it.
