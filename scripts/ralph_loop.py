@@ -209,7 +209,7 @@ class Config:
     max_iterations: int = 10
     task_timeout: int = 1800
     idle_timeout: int = 60
-    heartbeat_interval: int = 60
+    heartbeat_interval: int = 30
     skip_dirty_check: str = ""
     skip_precheck: str = ""
     plan_pointer: Path | None = None
@@ -240,7 +240,7 @@ def parse_config(argv: list[str] | None = None) -> Config:
         max_iterations=max_iter,
         task_timeout=int(os.environ.get("RALPH_TASK_TIMEOUT", "1800")),
         idle_timeout=int(os.environ.get("RALPH_IDLE_TIMEOUT", "60")),
-        heartbeat_interval=int(os.environ.get("RALPH_HEARTBEAT_INTERVAL", "60")),
+        heartbeat_interval=int(os.environ.get("RALPH_HEARTBEAT_INTERVAL", "30")),
         skip_dirty_check=os.environ.get("RALPH_SKIP_DIRTY_CHECK", ""),
         skip_precheck=os.environ.get("RALPH_SKIP_PRECHECK", ""),
         plan_pointer=plan_pointer,
