@@ -169,14 +169,11 @@ if [ -d "$PROJECT_ROOT/knowledge" ]; then
   done < <(find "$PROJECT_ROOT/knowledge" -type f -name "*.md" 2>/dev/null)
 fi
 
-# ─── W6/W7: OpenViking dependency checks ──────────────────────────────────────
+# ─── W6: OpenViking dependency checks ──────────────────────────────────────
 KB=$(python3 -c "import json;print(json.load(open('$OVERLAY_FILE')).get('knowledge_backend','file'))" 2>/dev/null || echo "file")
 if [ "$KB" = "openviking" ]; then
   if ! python3 -c "import openviking" 2>/dev/null; then
     warn "W6: knowledge_backend=openviking but openviking not installed (pip install openviking)"
-  fi
-  if ! command -v socat &>/dev/null; then
-    warn "W7: socat not found — required for OpenViking daemon communication (brew install socat)"
   fi
 fi
 

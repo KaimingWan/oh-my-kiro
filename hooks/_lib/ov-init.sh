@@ -19,12 +19,21 @@ ov_init() {
   _ov_check_overlay || return 1
   [ -S "$OV_SOCKET" ] || return 1
   local resp
-  resp=$(echo '{"cmd":"health"}' | socat - UNIX-CONNECT:"$OV_SOCKET" 2>/dev/null)
+  resp=$(ov_call '{"cmd":"health"}')
   echo "$resp" | grep -q '"ok"' && OV_AVAILABLE=1 || return 1
 }
 
 ov_call() {
-  echo "$1" | socat - UNIX-CONNECT:"$OV_SOCKET" 2>/dev/null
+  python3 -c "
+import socket,json,sys
+s=socket.socket(socket.AF_UNIX,socket.SOCK_STREAM)
+s.settimeout(3)
+s.connect('$OV_SOCKET')
+s.sendall(sys.argv[1].encode())
+d=s.recv(65536)
+s.close()
+print(d.decode())
+" "$1" 2>/dev/null
 }
 
 ov_search() {

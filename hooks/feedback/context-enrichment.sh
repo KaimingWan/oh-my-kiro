@@ -210,6 +210,28 @@ if [ -f "knowledge/episodes.md" ]; then
   [ "$EP_COUNT" -gt 0 ] && emit "📌 $EP_COUNT related episodes found"
 fi
 
+# ── Layer 4: OpenViking semantic search ──
+OV_LIB="$SCRIPT_DIR/../_lib/ov-init.sh"
+if [ -f "$OV_LIB" ] && [ -n "$USER_MSG" ]; then
+  source "$OV_LIB"
+  if ov_init 2>/dev/null; then
+    OV_RESP=$(ov_search "$USER_MSG" 3)
+    if echo "$OV_RESP" | grep -q '"ok": *true'; then
+      OV_RESULTS=$(echo "$OV_RESP" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+for r in d.get('results',[])[:3]:
+  print(r[:120] if isinstance(r,str) else str(r)[:120])
+" 2>/dev/null)
+      if [ -n "$OV_RESULTS" ]; then
+        while IFS= read -r r; do
+          [ -n "$r" ] && emit "🔎 $r"
+        done <<< "$OV_RESULTS"
+      fi
+    fi
+  fi
+fi
+
 # ── Output: truncate to max 8 lines ──
 if [ -n "$OUTPUT" ]; then
   LINE_COUNT=$(echo "$OUTPUT" | wc -l | tr -d ' ')

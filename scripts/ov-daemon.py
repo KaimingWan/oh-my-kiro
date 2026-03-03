@@ -14,11 +14,12 @@ if not api_key:
     sys.exit(1)
 
 os.environ['OPENVIKING_EMBEDDING_DENSE_PROVIDER'] = 'openai'
-os.environ['OPENVIKING_EMBEDDING_DENSE_MODEL'] = 'text-embedding-3-small'
+os.environ['OPENVIKING_EMBEDDING_DENSE_MODEL'] = 'text-embedding-3-large'
+os.environ['OPENVIKING_EMBEDDING_DENSE_DIMENSION'] = '3072'
 os.environ['OPENVIKING_EMBEDDING_DENSE_API_KEY'] = api_key
 
 try:
-    from openviking import SyncOpenViking
+    from openviking import SyncOpenViking, StorageConfig
 except ImportError:
     print("Error: openviking not installed. Run: pip install openviking", file=sys.stderr)
     sys.exit(1)
@@ -66,7 +67,8 @@ def handle(conn):
 def main():
     global ov
     data_dir = os.environ.get("OV_DATA_DIR", os.path.join(os.getcwd(), "data/openviking"))
-    ov = SyncOpenViking(path=data_dir)
+    storage = StorageConfig(provider="local", path=data_dir)
+    ov = SyncOpenViking(path=data_dir, storage=storage)
     ov.initialize()
     if os.path.exists(SOCKET_PATH):
         os.unlink(SOCKET_PATH)

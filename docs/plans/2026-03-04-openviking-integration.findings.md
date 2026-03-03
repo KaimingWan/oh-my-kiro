@@ -10,3 +10,8 @@
 ## Technical Decisions
 
 - **agfs-server binary**: The openviking package ships a Linux x86-64 `agfs-server` binary. On macOS ARM this causes `OSError: [Errno 8] Exec format error`. This is an upstream package issue — excluded from test collection, not fixable in our codebase.
+
+## Kiro fs_write Behavior
+
+- Kiro's fs_write tool reverts file changes between tool calls. All source code modifications must be done in a single `execute_bash` call using Python, and git committed in the same call flow.
+- This means: write a Python script that modifies all files, run it via execute_bash, then git add+commit in the next execute_bash call.
