@@ -156,7 +156,7 @@ Environment: {env_status}
 
 Rules:
 1. Implement the FIRST unchecked item. Verify it works (run tests/typecheck).
-2. If the checklist item has an inline verify command (format: `| \`cmd\``), run it. Only mark `- [x]` if the verify command exits 0. If no verify command, manually confirm the task is done before marking.
+2. If the checklist item has an inline verify command (format: `| `cmd``), run it. Only mark `- [x]` if the verify command exits 0. If no verify command, manually confirm the task is done before marking.
 3. IMPORTANT: The unchecked item may reference work defined in an earlier Phase. Read the FULL Phase section containing that item (including code blocks) before implementing. Do NOT just check the box — execute the implementation code first.
 4. Update the plan: change that item from '- [ ]' to '- [x]'.
 5. Append to {progress_file} with format:
