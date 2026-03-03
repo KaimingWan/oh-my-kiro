@@ -328,6 +328,6 @@ Expected: PASS
 - [x] ov-daemon.py uses StorageConfig | `grep -q StorageConfig scripts/ov-daemon.py`
 - [x] ov-daemon.py uses text-embedding-3-large | `grep -q 'text-embedding-3-large' scripts/ov-daemon.py && ! grep -q 'text-embedding-3-small' scripts/ov-daemon.py`
 - [x] context-enrichment.sh calls ov_search when OV available | `python3 -m pytest tests/test_ov_recall.py::test_enrichment_calls_ov_search -v`
-- [ ] context-enrichment.sh fallback works without OV | `python3 -m pytest tests/test_ov_recall.py::test_enrichment_fallback_no_ov -v`
+- [x] context-enrichment.sh fallback works without OV | `python3 -m pytest tests/test_ov_recall.py::test_enrichment_fallback_no_ov -v`
 - [ ] auto-capture.sh indexes to OV after episode write | `python3 -m pytest tests/test_ov_capture.py::test_auto_capture_indexes_to_ov -v`
 - [ ] post-write.sh indexes findings/progress to OV | `python3 -m pytest tests/test_ov_capture.py::test_post_write_indexes_findings -v`

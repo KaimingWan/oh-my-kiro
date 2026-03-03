@@ -30,3 +30,10 @@
   - text-embedding-3-large needs OPENVIKING_EMBEDDING_DENSE_DIMENSION=3072
   - context-enrichment.sh 60s dedup can block tests — must clear dedup file keyed by cwd hash
 - **Status:** done
+
+## Iteration 3 — 2026-03-04
+
+- **Task:** Verify context-enrichment.sh fallback works without OV
+- **Files changed:** `docs/plans/2026-03-04-openviking-integration.md` — marked checklist item
+- **Learnings:** Fallback already works — when OV socket doesn't exist, ov_init returns 1 and the Layer 4 block is skipped silently. Script exits 0.
+- **Status:** done
