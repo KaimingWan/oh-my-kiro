@@ -27,3 +27,8 @@
 - **根因**: generate_configs.py 在 reviewer.json/researcher.json 中写了 `"prompt": "file://../../agents/reviewer-prompt.md"`，但 sync-omcc.sh 没有创建 `agents/` → `.omcc/agents/` 的 symlink
 - **修复**: 手动 `ln -sf .omcc/agents agents`
 - **待办**: sync-omcc.sh 应增加 Step 3.x 确保 `agents/` symlink，类似 commands/ 和 scripts/ 的处理
+
+2026-03-04 | active | azure-openai,api-key,embedding,openviking | 用户的AZURE_OPENAI_API_KEY兼容标准OpenAI SDK. 使用方式: client=OpenAI(base_url="https://o3-use.openai.azure.com/openai/v1/", api_key=key). deployment_name="text-embedding-3-large". 环境变量在~/.zshrc中export为AZURE_OPENAI_API_KEY. 测试openviking时需配置OPENVIKING_EMBEDDING_DENSE_PROVIDER=openai + 对应base_url和api_key
+
+2026-03-04 | active | timeout,bash,hang,install,openviking | 运行bash安装脚本(ov-install.sh)没加超时保护导致卡死被用户打断. 两个问题: ①运行可能交互/卡死的命令必须加超时(macOS用perl -e 'alarm(N); exec @ARGV') ②没调研清楚就动手, 在agfs-server二进制不兼容问题上浪费大量时间瞎试. 正确做法: 先调研openviking在macOS arm64上的正确安装方式(用户说另一台已部署成功), 再动手
+2026-03-04 | active | openviking,install,deploy,macos-arm,config,azure | OpenViking 0.1.12 Mac ARM部署知识: ①pip install openviking即可,无ov CLI,全靠Python/HTTP API ②Azure embedding环境变量必须含DENSE(OPENVIKING_EMBEDDING_DENSE_*),URL以/openai/v1/结尾,DIMENSION必须设3072 ③SyncOpenViking初始化必须传config参数(StorageConfig+AGFSConfig backend=local),否则连VikingDB localhost:8080报错 ④agfs-server路径: python3 -c "import openviking,os;print(os.path.join(os.path.dirname(openviking.__file__),'bin','agfs-server'))" ⑤ov-daemon通过/tmp/omcc-ov.sock通信 ⑥已知限制: AGFS timeout硬编码5s需30s+, Azure兼容不完美需0.1.13+, 项目通过env+自定义daemon绕过,生产可用

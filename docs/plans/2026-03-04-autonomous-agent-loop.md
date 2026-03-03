@@ -208,11 +208,11 @@ Expected: ALL PASS (87 existing + 4 new)
 
 ## Checklist
 
-- [ ] error_context.py extracts errors from log | `python3 -m pytest tests/ralph-loop/test_error_context.py -v`
-- [ ] build_prompt accepts stale_rounds/log_path/reverted_items params | `python3 -c "from scripts.ralph_loop import build_prompt; import inspect; sig=inspect.signature(build_prompt); assert 'stale_rounds' in sig.parameters and 'log_path' in sig.parameters and 'reverted_items' in sig.parameters"`
-- [ ] stale prompt contains error context and strategy-change instructions | `python3 -m pytest tests/ralph-loop/test_ralph_loop.py::test_stale_prompt_contains_error_context -v`
-- [ ] reverted items appear in prompt | `python3 -m pytest tests/ralph-loop/test_ralph_loop.py::test_reverted_items_in_prompt -v`
-- [ ] normal prompt has autonomous problem-solving instructions | `python3 -m pytest tests/ralph-loop/test_ralph_loop.py::test_normal_prompt_has_autonomous_instructions -v`
-- [ ] prompt includes codebase patterns consolidation instruction | `python3 -m pytest tests/ralph-loop/test_ralph_loop.py::test_prompt_instructs_patterns_consolidation -v`
-- [ ] main() passes stale_rounds, log_path, reverted to build_prompt | `python3 -c "import ast; tree=ast.parse(open('scripts/ralph_loop.py').read()); calls=[n for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id=='build_prompt']; kws={kw.arg for c in calls for kw in c.keywords}; assert 'stale_rounds' in kws and 'log_path' in kws, f'missing kwargs in build_prompt calls: {kws}'"`
-- [ ] 回归测试通过 | `python3 -m pytest tests/ralph-loop/ -v`
+- [x] error_context.py extracts errors from log | `python3 -m pytest tests/ralph-loop/test_error_context.py -v`
+- [x] build_prompt accepts stale_rounds/log_path/reverted_items params | `python3 -c "from scripts.ralph_loop import build_prompt; import inspect; sig=inspect.signature(build_prompt); assert 'stale_rounds' in sig.parameters and 'log_path' in sig.parameters and 'reverted_items' in sig.parameters"`
+- [x] stale prompt contains error context and strategy-change instructions | `python3 -m pytest tests/ralph-loop/test_ralph_loop.py::test_stale_prompt_contains_error_context -v`
+- [x] reverted items appear in prompt | `python3 -m pytest tests/ralph-loop/test_ralph_loop.py::test_reverted_items_in_prompt -v`
+- [x] normal prompt has autonomous problem-solving instructions | `python3 -m pytest tests/ralph-loop/test_ralph_loop.py::test_normal_prompt_has_autonomous_instructions -v`
+- [x] prompt includes codebase patterns consolidation instruction | `python3 -m pytest tests/ralph-loop/test_ralph_loop.py::test_prompt_instructs_patterns_consolidation -v`
+- [x] main() passes stale_rounds, log_path, reverted to build_prompt | `python3 -c "import ast; tree=ast.parse(open('scripts/ralph_loop.py').read()); calls=[n for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id=='build_prompt']; kws={kw.arg for c in calls for kw in c.keywords}; assert 'stale_rounds' in kws and 'log_path' in kws, f'missing kwargs in build_prompt calls: {kws}'"`
+- [x] 回归测试通过 | `python3 -m pytest tests/ralph-loop/ -v`
