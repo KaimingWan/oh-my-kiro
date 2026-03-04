@@ -57,6 +57,36 @@ Use to understand types without reading full implementation.
 7. get_diagnostics → verify fix (zero new diagnostics)
 ```
 
+## Structural Code Search (pattern_search)
+
+Use `pattern_search` for AST-aware bug pattern detection — finds structural matches that grep misses.
+
+### Find subprocess calls without timeout
+```
+pattern_search(pattern='subprocess.run($$$ARGS)', language='python')
+```
+Then inspect each match for missing `timeout=` parameter.
+
+### Find unchecked error returns (Go)
+```
+pattern_search(pattern='$VAR, _ := $FUNC($$$)', language='go')
+```
+
+### Find bare except clauses (Python)
+```
+pattern_search(pattern='except: $$$BODY', language='python')
+```
+
+### Find TODO/FIXME in code (not comments)
+```
+pattern_search(pattern='$VAR = "TODO"', language='python')
+```
+For comments, use grep instead — pattern_search matches code structure, not comments.
+
+### When to use pattern_search vs grep
+- **pattern_search**: structural code patterns (function signatures, error handling, API calls)
+- **grep**: literal text, comments, config values, log messages
+
 ## Multi-Component Diagnostic Patterns
 
 ### Boundary Instrumentation

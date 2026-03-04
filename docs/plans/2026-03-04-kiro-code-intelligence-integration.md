@@ -51,7 +51,7 @@ Add a `pattern_search` recipe section after the existing LSP recipes. Show how t
 - [x] code-analysis.md 包含 pattern_rewrite 指令 | `grep -q 'pattern_rewrite' .kiro/rules/code-analysis.md`
 - [x] code-analysis.md 记录 python pattern 注意事项 | `grep -q 'python' .kiro/rules/code-analysis.md`
 - [x] planning SKILL.md Phase 0 Step 1 包含 codebase overview | `grep -q 'generate_codebase_overview' skills/planning/SKILL.md`
-- [ ] debugging reference 包含 pattern_search recipe | `grep -q 'pattern_search' skills/debugging/reference.md`
+- [x] debugging reference 包含 pattern_search recipe | `grep -q 'pattern_search' skills/debugging/reference.md`
 - [ ] 所有修改文件语法正确（无 broken markdown） | `for f in .kiro/rules/code-analysis.md skills/planning/SKILL.md skills/debugging/reference.md; do test -f "$f" && head -1 "$f" | grep -q '^#' || exit 1; done`
 
 ## Errors

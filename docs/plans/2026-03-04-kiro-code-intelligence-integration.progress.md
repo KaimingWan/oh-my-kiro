@@ -19,3 +19,9 @@
 - **Files changed:** `docs/plans/2026-03-04-kiro-code-intelligence-integration.md`, `skills/planning/SKILL.md`
 - **Learnings:** Iteration 1 implemented all 5 Task 1 directives in one pass but only checked off the first item. Always verify actual state vs checklist state before starting work.
 - **Status:** done
+
+## Iteration 3 — 2026-03-04
+- **Task:** Add pattern_search recipe section to debugging reference.md (Task 3)
+- **Files changed:** `skills/debugging/reference.md`, `docs/plans/2026-03-04-kiro-code-intelligence-integration.md`
+- **Learnings:** pattern_search recipes should clarify when to use pattern_search vs grep — structural code patterns vs literal text.
+- **Status:** done
