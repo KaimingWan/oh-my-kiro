@@ -790,3 +790,17 @@ def test_prompt_instructs_patterns_consolidation(tmp_path):
     pf = PlanFile(plan_file)
     prompt = build_prompt(1, pf, plan_file, tmp_path, skip_precheck="1", is_first=True)
     assert "Codebase Patterns" in prompt or "codebase patterns" in prompt
+
+def test_reasoning_loop_in_prompt(tmp_path):
+    plan = tmp_path / "plan.md"
+    plan.write_text("- [ ] Implement user auth module | `python3 -c 'import auth'`\n")
+    from scripts.ralph_loop import build_prompt
+    from scripts.lib.plan import PlanFile
+    result = build_prompt(1, PlanFile(plan), plan, tmp_path)
+    # Verify all 7 reasoning loop steps are present
+    for step in ["OBSERVE", "THINK", "PLAN", "EXECUTE", "REFLECT", "CORRECT", "VERIFY"]:
+        assert step in result, f"Missing reasoning loop step: {step}"
+    # Verify the section header exists
+    assert "Reasoning Loop" in result
+    # Verify it mentions coarse/vague items
+    assert "coarse" in result.lower() or "vague" in result.lower()

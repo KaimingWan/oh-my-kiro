@@ -196,6 +196,20 @@ Rules:
 10. If a command is blocked by a security hook, read the suggested alternative and retry with the safe command. If blocked 3+ times on the same item, mark it as '- [SKIP] blocked by security hook' and continue.
 11. NEVER mark an item `- [x]` if the verify command fails or the implementation was not actually executed. If unsure, re-run the verify command.
 12. Codebase Patterns: When you discover patterns (naming conventions, error handling idioms, test structure), note them in {findings_file} under a "## Codebase Patterns" section so future iterations can reuse them.
+
+## Reasoning Loop (for coarse/vague checklist items)
+
+When a checklist item is high-level or vague, use this internal reasoning cycle to decompose and execute it:
+
+1. **OBSERVE** — Read the item, its verify command, and any related plan sections. Identify what's known vs unknown.
+2. **THINK** — What does this item actually require? What are the concrete sub-steps?
+3. **PLAN** — Break it into ordered sub-steps with clear success criteria.
+4. **EXECUTE** — Implement each sub-step. Run intermediate checks as you go.
+5. **REFLECT** — Did the sub-step work? Any unexpected issues?
+6. **CORRECT** — Fix issues found during reflection. Adjust remaining sub-steps if needed.
+7. **VERIFY** — Run the item's verify command. Only mark done if it exits 0.
+
+Repeat steps 4-7 for each sub-step. The item is complete only when the final VERIFY passes.
 """
 
 

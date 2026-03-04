@@ -79,7 +79,7 @@ Run full regression to ensure nothing broke.
 
 ## Checklist
 
-- [ ] Reasoning loop instructions added to build_prompt | `python3 -m pytest tests/ralph-loop/test_ralph_loop.py::test_reasoning_loop_in_prompt -v`
+- [x] Reasoning loop instructions added to build_prompt | `python3 -m pytest tests/ralph-loop/test_ralph_loop.py::test_reasoning_loop_in_prompt -v`
 - [ ] Coarse-item guidance added to planning skill | `grep -q 'Coarse Checklist Items' skills/planning/SKILL.md`
 - [ ] 回归测试通过 | `python3 -m pytest tests/ralph-loop/ -v -k 'not test_flock_prevents_double_ralph'`
 
