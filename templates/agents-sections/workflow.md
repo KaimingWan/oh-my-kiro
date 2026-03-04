@@ -25,4 +25,5 @@
 
 ## Knowledge Retrieval
 - Question → knowledge/INDEX.md → topic indexes → source docs
+- Hook 🔎 结果优先 — 有 OV 召回时先用召回内容，不够再 find/grep 补搜。禁止绕过 OV 直接搜文件系统
 <!-- END OMCC WORKFLOW -->

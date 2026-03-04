@@ -27,7 +27,7 @@ ov_call() {
   python3 -c "
 import socket,json,sys
 s=socket.socket(socket.AF_UNIX,socket.SOCK_STREAM)
-s.settimeout(3)
+s.settimeout(8)
 s.connect('$OV_SOCKET')
 s.sendall(sys.argv[1].encode())
 d=s.recv(65536)
