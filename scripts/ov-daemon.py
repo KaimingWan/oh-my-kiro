@@ -5,6 +5,12 @@ import os
 import sys
 import socket
 import threading
+import logging
+import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+log = logging.getLogger("ov-daemon")
 
 # Configure OpenViking BEFORE importing (singleton pattern)
 # Priority: OLLAMA > OPENAI > AZURE
@@ -65,6 +71,82 @@ def _autocut(results, min_score=0.55, max_gap=0.08):
             break
     return cut
 
+# --- LLM query rewrite ---
+_REWRITE_PROMPT = (
+    "Convert user message to a knowledge base search query for AutoMQ GTM. "
+    "Strip greetings and irrelevant context. "
+    "If the query mentions a competitor (Confluent, MSK, Redpanda, WarpStream, Kafka), "
+    "rewrite as 'AutoMQ vs <competitor> <topic>' in English. "
+    "If about a task, include what tools/knowledge needed. "
+    "Output ONLY the search query in English, no explanation."
+)
+
+def rewrite_query(query: str) -> str | None:
+    """Rewrite query via LLM. Returns None on failure (silent fallback)."""
+    api_key = os.environ.get("AZURE_OPENAI_API_KEY")
+    if not api_key:
+        return None
+    endpoint = "https://o3-use.openai.azure.com/openai/v1/chat/completions"
+    body = json.dumps({
+        "model": "o3-mini",
+        "reasoning_effort": "low",
+        "messages": [
+            {"role": "system", "content": _REWRITE_PROMPT},
+            {"role": "user", "content": query},
+        ],
+    }).encode()
+    req = urllib.request.Request(endpoint, data=body, headers={
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read())
+            rewritten = data["choices"][0]["message"]["content"].strip()
+            if rewritten:
+                log.info("Query rewrite: %r -> %r", query, rewritten)
+                return rewritten
+    except Exception as e:
+        log.warning("Query rewrite failed (fallback to original): %s", e)
+    return None
+
+
+def _dual_search(ov_instance, query: str, limit: int, threshold: float, rewrite_wait: float = 10):
+    """Dual-path search: rewritten query + original query in parallel, merge & dedup.
+    Original path is always awaited; rewritten path waits up to rewrite_wait seconds."""
+    all_resources = {}
+
+    def _search_original():
+        return ov_instance.search(query, limit=limit * 2, score_threshold=threshold).resources
+
+    def _search_rewritten():
+        rewritten = rewrite_query(query)
+        if rewritten and rewritten.lower().strip() != query.lower().strip():
+            return ov_instance.search(rewritten, limit=limit * 2, score_threshold=threshold).resources
+        return []
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        fut_orig = pool.submit(_search_original)
+        fut_rw = pool.submit(_search_rewritten)
+
+        # Always wait for original search
+        try:
+            for r in fut_orig.result(timeout=5):
+                all_resources[r.uri] = r
+        except Exception as e:
+            log.warning("original search failed: %s", e)
+
+        # Wait for rewrite path up to rewrite_wait
+        try:
+            for r in fut_rw.result(timeout=rewrite_wait):
+                if r.uri not in all_resources or r.score > all_resources[r.uri].score:
+                    all_resources[r.uri] = r
+        except Exception as e:
+            log.info("rewritten search skipped: %s", type(e).__name__)
+
+    return sorted(all_resources.values(), key=lambda r: r.score, reverse=True)
+
+
 def handle(conn):
     data = conn.recv(65536).decode()
     req = json.loads(data)
@@ -76,9 +158,9 @@ def handle(conn):
                 conn.sendall(json.dumps({"ok": True, "results": []}).encode())
                 return
             limit = req.get("limit", 3)
-            result = ov.search(query, limit=limit * 2,
-                               score_threshold=req.get("threshold", 0.3))
-            filtered = _autocut(result.resources)[:limit]
+            resources = _dual_search(ov, query, limit, req.get("threshold", 0.3),
+                                     rewrite_wait=req.get("rewrite_wait", 10))
+            filtered = _autocut(resources)[:limit]
             out = []
             for r in filtered:
                 text = r.abstract or r.uri
