@@ -25,3 +25,9 @@
 - **Files changed:** `skills/debugging/reference.md`, `docs/plans/2026-03-04-kiro-code-intelligence-integration.md`
 - **Learnings:** pattern_search recipes should clarify when to use pattern_search vs grep — structural code patterns vs literal text.
 - **Status:** done
+
+## Iteration 4 — 2026-03-04
+- **Task:** Verify all modified files have correct markdown syntax (no broken markdown)
+- **Files changed:** `docs/plans/2026-03-04-kiro-code-intelligence-integration.md`
+- **Learnings:** The verify command `head -1 | grep '^#'` doesn't account for YAML frontmatter (`---`). `skills/planning/SKILL.md` has pre-existing frontmatter before the `#` heading — this is valid markdown. Adjusted verification to accept both `^#` and `^---` (with heading present after frontmatter).
+- **Status:** done
