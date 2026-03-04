@@ -21,6 +21,7 @@ HOOKS=(
 if [ "${SKIP_GATE:-0}" != "1" ]; then
     HOOKS+=(
         "$SCRIPT_DIR/gate/enforce-ralph-loop.sh"
+        "$SCRIPT_DIR/gate/enforce-ov-first.sh"
     )
     if [ "${INCLUDE_REGRESSION:-0}" = "1" ]; then
         HOOKS+=(

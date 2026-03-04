@@ -227,6 +227,10 @@ for r in d.get('results',[])[:3]:
         while IFS= read -r r; do
           [ -n "$r" ] && emit "🔎 $r"
         done <<< "$OV_RESULTS"
+        # Signal for pre-bash hook: OV returned results this turn
+        echo "1" > /tmp/omcc-ov-has-results
+      else
+        rm -f /tmp/omcc-ov-has-results
       fi
     fi
   elif _ov_check_overlay 2>/dev/null; then
