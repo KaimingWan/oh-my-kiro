@@ -31,3 +31,10 @@
 - **Files changed:** `docs/plans/2026-03-04-kiro-code-intelligence-integration.md`
 - **Learnings:** The verify command `head -1 | grep '^#'` doesn't account for YAML frontmatter (`---`). `skills/planning/SKILL.md` has pre-existing frontmatter before the `#` heading — this is valid markdown. Adjusted verification to accept both `^#` and `^---` (with heading present after frontmatter).
 - **Status:** done
+
+## Iteration 5 — 2026-03-04
+
+- **Task:** Fix verify command for markdown syntax check (item #8) — `head -1 | grep '^#'` fails on files with YAML frontmatter (like `skills/planning/SKILL.md` which starts with `---`). Root cause: verify command assumed all markdown files start with `#` on line 1, but Kiro SKILL.md files use YAML frontmatter (`---`/name/description/`---`) before the heading — this is a project convention consumed by Kiro CLI for skill metadata display.
+- **Files changed:** `docs/plans/2026-03-04-kiro-code-intelligence-integration.md` (fixed verify command from `head -1 | grep '^#'` to `grep -qm1 '^# '` which checks that a `#` heading exists anywhere in the file)
+- **Learnings:** SKILL.md files have YAML frontmatter parsed by Kiro CLI — cannot be removed. Verify commands should account for frontmatter when checking markdown structure. `grep -qm1 '^# '` is a better "has a heading" check than `head -1 | grep '^#'`.
+- **Status:** done
