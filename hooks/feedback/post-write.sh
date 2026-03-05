@@ -72,8 +72,38 @@ run_ov_index() {
   return 0
 }
 
+# === Lesson scenario generation (lessons-learned.md) ===
+run_lesson_scenarios() {
+  case "$FILE" in
+    *lessons-learned.md) ;;
+    *) return 0 ;;
+  esac
+  local GEN_SCRIPT
+  # Check OMCC scripts dir first, then project tools/
+  for candidate in "$(dirname "${BASH_SOURCE[0]}")/../../scripts/generate-lesson-scenarios.py" "tools/generate-lesson-scenarios.py"; do
+    [ -f "$candidate" ] && GEN_SCRIPT="$candidate" && break
+  done
+  [ -z "$GEN_SCRIPT" ] && return 0
+
+  local NEW_CONTENT
+  NEW_CONTENT=$(echo "$INPUT" | jq -r '.tool_input.new_str // .tool_input.file_text // empty' 2>/dev/null)
+  [ -z "$NEW_CONTENT" ] && return 0
+  local SUMMARY
+  SUMMARY=$(echo "$NEW_CONTENT" | head -5 | tr '\n' ' ' | cut -c1-200)
+  [ -z "$SUMMARY" ] && return 0
+
+  if [ -S "${OV_SOCKET:-/tmp/omcc-ov.sock}" ]; then
+    python3 "$GEN_SCRIPT" --single "$SUMMARY" 2>/dev/null &
+  else
+    python3 "$GEN_SCRIPT" --single "$SUMMARY" --dry-run 2>/dev/null &
+  fi
+  echo "📝 Lesson detected → scenario generation triggered" >&2
+  return 0
+}
+
 # --- Execute all ---
 run_lint || true
 run_test
 run_ov_index || true
+run_lesson_scenarios || true
 exit $?

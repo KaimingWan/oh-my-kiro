@@ -53,6 +53,10 @@ if [ "$OV_AVAILABLE" = "1" ]; then
   for _f in knowledge/*.md; do
     [ -f "$_f" ] && ov_add "$_f" "session-init sync" 2>/dev/null || true
   done
+  # Index lesson scenario files if they exist
+  for _f in knowledge/lesson-scenarios/lesson-scenario-*.md; do
+    [ -f "$_f" ] && ov_add "$_f" "lesson-scenario sync" 2>/dev/null || true
+  done
 else
   _ov_check_overlay 2>/dev/null && echo "⚠️ OV daemon unavailable at session start — knowledge sync skipped"
 fi

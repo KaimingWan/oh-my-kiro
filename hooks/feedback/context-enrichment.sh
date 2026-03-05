@@ -215,19 +215,44 @@ OV_LIB="$SCRIPT_DIR/../_lib/ov-init.sh"
 if [ -f "$OV_LIB" ] && [ -n "$USER_MSG" ]; then
   source "$OV_LIB"
   if ov_init 2>/dev/null; then
-    OV_RESP=$(ov_search "$USER_MSG" 3)
+    OV_RESP=$(ov_search "$USER_MSG" 5)
     if echo "$OV_RESP" | grep -q '"ok": *true'; then
       OV_RESULTS=$(echo "$OV_RESP" | python3 -c "
 import json,sys
 d=json.load(sys.stdin)
-for r in d.get('results',[])[:3]:
-  print(r[:120] if isinstance(r,str) else str(r)[:120])
+for r in d.get('results',[])[:5]:
+  print(r[:200] if isinstance(r,str) else str(r)[:200])
 " 2>/dev/null)
       if [ -n "$OV_RESULTS" ]; then
+        LESSON_EMITTED=0
         while IFS= read -r r; do
-          [ -n "$r" ] && emit "🔎 $r"
+          [ -z "$r" ] && continue
+          if echo "$r" | grep -q 'lesson-scenario'; then
+            # Resolve lesson-scenario file and inject full lesson content
+            LESSON_PATH=$(echo "$r" | python3 -c "
+import sys,glob
+line=sys.stdin.readline()
+parts=line.split('viking://resources/')
+if len(parts)<2: sys.exit()
+slug=parts[1].split('/')[0]
+prefix=slug.rsplit('_',1)[0] if '_' in slug else slug
+for m in glob.glob(f'knowledge/lesson-scenarios/{prefix}*'):
+  if m.endswith('.md'): print(m); break
+" 2>/dev/null)
+            if [ -n "$LESSON_PATH" ] && [ -f "$LESSON_PATH" ]; then
+              TITLE=$(head -1 "$LESSON_PATH" | sed 's/^# Lesson: //')
+              CONTENT=$(awk '/^## 教训内容/{found=1;next} /^## /{found=0} found' "$LESSON_PATH" | head -10)
+              if [ -n "$CONTENT" ]; then
+                emit "⚠️ LESSON: $TITLE"
+                emit "$CONTENT"
+                LESSON_EMITTED=$((LESSON_EMITTED + 1))
+              fi
+            fi
+            [ "$LESSON_EMITTED" -ge 2 ] && continue  # cap lesson injection
+          else
+            emit "🔎 $r"
+          fi
         done <<< "$OV_RESULTS"
-        # Signal for pre-bash hook: OV returned results this turn
         echo "1" > /tmp/omcc-ov-has-results
       else
         rm -f /tmp/omcc-ov-has-results
