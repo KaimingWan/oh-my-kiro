@@ -79,7 +79,7 @@ ok "Step 3: Agent configs generated"
 
 # ─── Step 3.5: Ensure commands symlink ────────────────────────────────────────
 if [ -d "$OMK_ROOT/commands" ] && [ ! -e "$PROJECT_ROOT/commands" ]; then
-  ln -s .omcc/commands "$PROJECT_ROOT/commands"
+  ln -s .omk/commands "$PROJECT_ROOT/commands"
   ok "Step 3.5: commands/ symlink created"
 elif [ -L "$PROJECT_ROOT/commands" ]; then
   info "Step 3.5: commands/ symlink already exists"
@@ -104,7 +104,7 @@ fi
 
 # ─── Step 3.7: Ensure scripts symlink (needed for ralph_loop.py) ──────────────
 if [ -d "$OMK_ROOT/scripts" ] && [ ! -e "$PROJECT_ROOT/scripts" ]; then
-  ln -s .omcc/scripts "$PROJECT_ROOT/scripts"
+  ln -s .omk/scripts "$PROJECT_ROOT/scripts"
   ok "Step 3.7: scripts/ symlink created"
 elif [ -L "$PROJECT_ROOT/scripts" ]; then
   info "Step 3.7: scripts/ symlink already exists"

@@ -54,7 +54,7 @@ def validate() -> int:
     for m in dispatcher_pattern.finditer(self_text):
         in_registry.add(m.group(1))
 
-    # Source 3: overlay extra_hooks (project-specific hooks declared in .omcc-overlay.json)
+    # Source 3: overlay extra_hooks (project-specific hooks declared in .omk-overlay.json or .omcc-overlay.json)
     overlay_file = PROJECT_ROOT / ".omk-overlay.json"
     if not overlay_file.exists():
         overlay_file = PROJECT_ROOT / ".omcc-overlay.json"  # backward compat

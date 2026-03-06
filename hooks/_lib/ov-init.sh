@@ -1,12 +1,12 @@
 #!/bin/bash
-# OpenViking client library for OMCC hooks
+# OpenViking client library for OMK hooks
 # Communicates with ov-daemon via Unix socket
 
 OV_AVAILABLE=0
-OV_SOCKET="${OV_SOCKET:-/tmp/omcc-ov.sock}"
+OV_SOCKET="${OV_SOCKET:-/tmp/omk-ov.sock}"
 
 _ov_check_overlay() {
-  local overlay=".omcc-overlay.json"
+  local overlay=".omk-overlay.json"
   [ -f "$overlay" ] || return 1
   python3 -c "
 import json,sys

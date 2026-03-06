@@ -62,7 +62,7 @@ fi
 
 echo "🚀 Initializing: $TARGET ($PROJECT_NAME) [type=$PROJECT_TYPE]"
 
-mkdir -p "$TARGET"/{.claude,.kiro/rules,.kiro/agents,knowledge/product,docs/{designs,plans,research,decisions},tools,templates}
+mkdir -p "$TARGET"/{.kiro/rules,.kiro/agents,knowledge/product,docs/{designs,plans,research,decisions},tools,templates}
 
 # ── Copy CLAUDE.md ────────────────────────────────────────────────────────────
 cp "$TEMPLATE_DIR/CLAUDE.md" "$TARGET/CLAUDE.md"

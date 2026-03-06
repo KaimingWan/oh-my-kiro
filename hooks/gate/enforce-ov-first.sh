@@ -7,7 +7,7 @@ CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 [ -z "$CMD" ] && exit 0
 
 # Only enforce when OV returned results this turn
-[ -f /tmp/omcc-ov-has-results ] || exit 0
+[ -f /tmp/omk-ov-has-results ] || exit 0
 
 # Check if command searches knowledge directory via find/grep/ls
 if echo "$CMD" | grep -qiE '(find|grep|rg|ag|ls)\b.*\bknowledge[/ ]'; then

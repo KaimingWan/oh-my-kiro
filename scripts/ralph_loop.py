@@ -388,7 +388,7 @@ def main():
             break
 
         # Launch kiro-cli with PTY for unbuffered output + idle watchdog
-        if base_cmd[0] == 'claude':
+        if base_cmd[0] == 'kiro-cli':
             cmd = [base_cmd[0], '-p', prompt] + base_cmd[2:]
         else:
             cmd = base_cmd + [prompt]

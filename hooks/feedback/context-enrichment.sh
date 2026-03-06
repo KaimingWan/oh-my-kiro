@@ -253,9 +253,9 @@ for m in glob.glob(f'knowledge/lesson-scenarios/{prefix}*'):
             emit "🔎 $r"
           fi
         done <<< "$OV_RESULTS"
-        echo "1" > /tmp/omcc-ov-has-results
+        echo "1" > /tmp/omk-ov-has-results
       else
-        rm -f /tmp/omcc-ov-has-results
+        rm -f /tmp/omk-ov-has-results
       fi
     fi
   elif _ov_check_overlay 2>/dev/null; then

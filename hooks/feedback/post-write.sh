@@ -79,7 +79,7 @@ run_lesson_scenarios() {
     *) return 0 ;;
   esac
   local GEN_SCRIPT
-  # Check OMCC scripts dir first, then project tools/
+  # Check OMK scripts dir first, then project tools/
   for candidate in "$(dirname "${BASH_SOURCE[0]}")/../../scripts/generate-lesson-scenarios.py" "tools/generate-lesson-scenarios.py"; do
     [ -f "$candidate" ] && GEN_SCRIPT="$candidate" && break
   done
@@ -92,7 +92,7 @@ run_lesson_scenarios() {
   SUMMARY=$(echo "$NEW_CONTENT" | head -5 | tr '\n' ' ' | cut -c1-200)
   [ -z "$SUMMARY" ] && return 0
 
-  if [ -S "${OV_SOCKET:-/tmp/omcc-ov.sock}" ]; then
+  if [ -S "${OV_SOCKET:-/tmp/omk-ov.sock}" ]; then
     python3 "$GEN_SCRIPT" --single "$SUMMARY" 2>/dev/null &
   else
     python3 "$GEN_SCRIPT" --single "$SUMMARY" --dry-run 2>/dev/null &

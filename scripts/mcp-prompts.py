@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""MCP Prompt Server for OMCC — exposes agent/know prompts with optional arguments."""
+"""MCP Prompt Server for OMK — exposes agent/know prompts with optional arguments."""
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("o")

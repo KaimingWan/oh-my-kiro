@@ -49,7 +49,7 @@ except ImportError:
     print("Error: openviking not installed. Run: pip install openviking", file=sys.stderr)
     sys.exit(1)
 
-SOCKET_PATH = "/tmp/omcc-ov.sock"
+SOCKET_PATH = "/tmp/omk-ov.sock"
 ov = None
 
 # --- Gate: filter noise queries ---
