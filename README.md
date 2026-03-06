@@ -1,11 +1,11 @@
-# oh-my-claude-code
-[![Release](https://img.shields.io/github/v/release/KaimingWan/oh-my-claude-code?include_prereleases)](https://github.com/KaimingWan/oh-my-claude-code/releases)
+# oh-my-kiro
+[![Release](https://img.shields.io/github/v/release/KaimingWan/oh-my-kiro?include_prereleases)](https://github.com/KaimingWan/oh-my-kiro/releases)
 
 **Turn your AI coding agent into a self-evolving, personalized super-intelligence.**
 
 Like oh-my-zsh for Zsh, but for AI coding agents. A framework that makes your agent learn from every interaction, persist valuable knowledge, and get stronger over time — automatically.
 
-Works with: **Claude Code** | **Kiro CLI**
+Works with: **Kiro CLI**
 
 ---
 
@@ -177,7 +177,7 @@ Additional configs: `pilot.json` (main orchestrator with all hooks wired) and `d
 
 ### OpenViking Semantic Search (Optional)
 
-When configured via `.omcc-overlay.json`, the framework uses OpenViking for semantic knowledge recall:
+When configured via `.omk-overlay.json`, the framework uses OpenViking for semantic knowledge recall:
 
 - **Auto-indexing**: knowledge files are automatically synced to OV on every write (fs_write, execute_bash, or session startup)
 - **Semantic recall**: context-enrichment hook queries OV on every user prompt, injecting relevant knowledge snippets
@@ -189,7 +189,7 @@ When configured via `.omcc-overlay.json`, the framework uses OpenViking for sema
 The execution engine for approved plans. A Python outer loop (`scripts/ralph_loop.py`) that:
 
 1. Reads the plan's `## Checklist` section
-2. Spawns a fresh CLI instance (Kiro or Claude Code) per iteration
+2. Spawns a fresh CLI instance (Kiro or Kiro) per iteration
 3. Each iteration works on unchecked items until context fills up
 4. Verifies checklist items by running their inline verify commands
 5. Reverts any `- [x]` items whose verify commands fail
@@ -216,9 +216,9 @@ The execution engine for approved plans. A Python outer loop (`scripts/ralph_loo
 │   ├── ov-daemon.py               # OpenViking semantic search daemon
 │   └── lib/                       # Shared Python modules (plan.py, cli_detect.py, etc.)
 ├── tools/                         # CLI tools
-│   ├── init-project.sh            # Bootstrap OMCC into existing project
+│   ├── init-project.sh            # Bootstrap OMK into existing project
 │   ├── install-skill.sh           # Install individual skills
-│   ├── sync-omcc.sh               # Sync upstream OMCC changes
+│   ├── sync-omk.sh               # Sync upstream OMK changes
 │   ├── validate-project.sh        # Validate project setup
 │   └── audit-skills.sh            # Audit skill integrity
 ├── .claude/                       # Generated CC config
@@ -244,12 +244,12 @@ Key design: `hooks/`, `skills/`, `agents/`, `commands/` are the single source of
 
 | Platform | Hooks | Commands | Skills | Subagents | Agent Configs |
 |----------|-------|----------|--------|-----------|---------------|
-| **Claude Code** | ✅ Full | Via slash commands | ✅ | ✅ Full | `.claude/agents/*.md` (YAML frontmatter) |
+| **Kiro** | ✅ Full | Via slash commands | ✅ | ✅ Full | `.claude/agents/*.md` (YAML frontmatter) |
 | **Kiro CLI** | ✅ 5 events (preToolUse, postToolUse, userPromptSubmit, stop, agentSpawn) | ✅ `.kiro/prompts/` | ✅ | ✅ With constraints | `.kiro/agents/*.json` |
 
-### Claude Code Support
+### Kiro Support
 
-Full Claude Code support via `scripts/generate_configs.py`:
+Full Kiro support via `scripts/generate_configs.py`:
 - Agent configs: `.claude/agents/{reviewer,researcher,executor}.md` with YAML frontmatter + inlined prompts
 - Hook wiring: `.claude/settings.json` with `$CLAUDE_PROJECT_DIR` paths
 - Ralph loop: auto-detects `claude` CLI and uses `claude -p` with appropriate `--allowedTools`
@@ -260,7 +260,7 @@ Full Claude Code support via `scripts/generate_configs.py`:
 ### Clone and customize
 
 ```bash
-git clone https://github.com/KaimingWan/oh-my-claude-code.git my-project
+git clone https://github.com/KaimingWan/oh-my-kiro.git my-project
 cd my-project
 python3 scripts/generate_configs.py  # Generate platform configs
 # Edit AGENTS.md — define your agent's identity
@@ -270,8 +270,8 @@ python3 scripts/generate_configs.py  # Generate platform configs
 ### Add to existing project
 
 ```bash
-git clone https://github.com/KaimingWan/oh-my-claude-code.git /tmp/omcc
-/tmp/omcc/tools/init-project.sh ./my-project "My Project"
+git clone https://github.com/KaimingWan/oh-my-kiro.git /tmp/omk
+/tmp/omk/tools/init-project.sh ./my-project "My Project"
 ```
 
 ### Cherry-pick

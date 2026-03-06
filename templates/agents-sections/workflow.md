@@ -1,4 +1,4 @@
-<!-- BEGIN OMCC WORKFLOW -->
+<!-- BEGIN OMK WORKFLOW -->
 ## Workflow
 - Explore → Plan → Code（先调研，再计划，再编码）
 - 复杂任务先 interview，不要假设
@@ -26,4 +26,4 @@
 ## Knowledge Retrieval
 - Question → knowledge/INDEX.md → topic indexes → source docs
 - Hook 🔎 结果优先 — 有 OV 召回时先用召回内容，不够再 find/grep 补搜。禁止绕过 OV 直接搜文件系统
-<!-- END OMCC WORKFLOW -->
+<!-- END OMK WORKFLOW -->

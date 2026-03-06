@@ -1,4 +1,4 @@
-<!-- BEGIN OMCC PRINCIPLES -->
+<!-- BEGIN OMK PRINCIPLES -->
 ## Principles
 - Evidence before claims（任何完成声明前必须有验证证据，enforced by stop hook）
 - As code（能代码化就不靠文字约束）
@@ -14,4 +14,4 @@
 - No hacky workarounds（发现需要 hack 说明设计有缺陷，应修复根因而非绕过）
 - Bold reform over timid patches（效果为王，质量优先）
 - Compound interest engineering（一件事重复做了 3 次，就考虑将其工具化）
-<!-- END OMCC PRINCIPLES -->
+<!-- END OMK PRINCIPLES -->

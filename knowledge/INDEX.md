@@ -16,7 +16,6 @@
 | Past mistakes & wins | `knowledge/episodes.md` | "Have we seen this before?" |
 | Framework design & architecture | `docs/designs/2026-02-13-framework-v2-upgrade.md` | "How does the hook system work?" |
 | Hook architecture & governance | `docs/designs/2026-02-18-hook-architecture.md` | "Hook classification? New hook process?" |
-| Claude Code compatibility | `knowledge/claude-code-research.md` | "CC hook format? CC auth? CC headless?" |
 | Reference materials (archived skills) | `knowledge/reference/` | "Mermaid syntax?" |
 
 ## Quick Links
@@ -27,7 +26,6 @@
 - [Security Rules](../.claude/rules/security.md) — Hooks, injection, workspace boundaries
 - [Framework v2 Design](../docs/designs/2026-02-13-framework-v2-upgrade.md) — Architecture & hooks
 - [Hook Architecture](../docs/designs/2026-02-18-hook-architecture.md) — Hook governance, classification, lifecycle
-- [Claude Code Research](claude-code-research.md) — CC hooks, auth, headless mode, tool names, agent format
 - [Reference Materials](reference/) — Archived skill content (writing style, mermaid, java, etc.)
 
 ---

@@ -13,4 +13,4 @@
 - Test tags in Preview mode before publishing container versions
 - Document all custom variables and triggers in the container
 
-<!-- OMCC SECTIONS: principles workflow self-learning authority -->
+<!-- OMK SECTIONS: principles workflow self-learning authority -->
