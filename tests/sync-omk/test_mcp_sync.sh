@@ -1,10 +1,10 @@
 #!/bin/bash
-# Tests for mcp.json merge logic in sync-omcc.sh Step 3.9
+# Tests for mcp.json merge logic in sync-omk.sh Step 3.9
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-OMCC_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-SYNC_SCRIPT="$OMCC_ROOT/tools/sync-omcc.sh"
+OMK_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+SYNC_SCRIPT="$OMK_ROOT/tools/sync-omk.sh"
 
 PASS=0; FAIL=0; TOTAL=0
 
@@ -25,20 +25,20 @@ assert_eq() {
 setup_project() {
   local tmp="$1"
   mkdir -p "$tmp/.kiro/settings" "$tmp/.kiro/rules" "$tmp/knowledge"
-  echo '{}' > "$tmp/.omcc-overlay.json"
-  # AGENTS.md with required OMCC markers
+  echo '{}' > "$tmp/.omk-overlay.json"
+  # AGENTS.md with required OMK markers
   cat > "$tmp/AGENTS.md" <<'AGENTS'
-<!-- BEGIN OMCC Framework -->
-<!-- END OMCC Framework -->
+<!-- BEGIN OMK Framework -->
+<!-- END OMK Framework -->
 AGENTS
   # knowledge/INDEX.md required by validation
   echo "# Index" > "$tmp/knowledge/INDEX.md"
-  cp "$OMCC_ROOT/templates/knowledge/episodes.md" "$tmp/knowledge/episodes.md" 2>/dev/null || touch "$tmp/knowledge/episodes.md"
-  cp "$OMCC_ROOT/templates/knowledge/rules.md" "$tmp/knowledge/rules.md" 2>/dev/null || touch "$tmp/knowledge/rules.md"
+  cp "$OMK_ROOT/templates/knowledge/episodes.md" "$tmp/knowledge/episodes.md" 2>/dev/null || touch "$tmp/knowledge/episodes.md"
+  cp "$OMK_ROOT/templates/knowledge/rules.md" "$tmp/knowledge/rules.md" 2>/dev/null || touch "$tmp/knowledge/rules.md"
   (cd "$tmp" && git init -q 2>/dev/null || true)
 }
 
-# ─── Test 1: Merge — OMCC servers merged, project-custom preserved ────────────
+# ─── Test 1: Merge — OMK servers merged, project-custom preserved ────────────
 echo "Test 1: mcp.json merge preserves project-custom servers"
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
@@ -58,9 +58,9 @@ O_CMD=$(jq -r '.mcpServers.o.command' "$TMP/.kiro/settings/mcp.json")
 CUSTOM=$(jq -r '.mcpServers["my-custom"].command' "$TMP/.kiro/settings/mcp.json")
 RIPGREP=$(jq -r '.mcpServers.ripgrep.command' "$TMP/.kiro/settings/mcp.json")
 
-assert_eq "OMCC 'o' server merged (uvx)" "uvx" "$O_CMD"
+assert_eq "OMK 'o' server merged (uvx)" "uvx" "$O_CMD"
 assert_eq "project-custom server preserved" "node" "$CUSTOM"
-assert_eq "OMCC 'ripgrep' server merged" "npx" "$RIPGREP"
+assert_eq "OMK 'ripgrep' server merged" "npx" "$RIPGREP"
 
 # ─── Test 2: o server uses uvx after sync ─────────────────────────────────────
 echo "Test 2: o server uses uvx after sync"

@@ -70,7 +70,7 @@ teardown
 # ─── Test E1: Invalid JSON overlay → exit 1 ───────────────────────────────────
 echo "--- T02: E1 invalid JSON overlay → exit 1"
 setup
-echo "{not valid json" > "$TMP/.omcc-overlay.json"
+echo "{not valid json" > "$TMP/.omk-overlay.json"
 OUT=$(bash "$VALIDATE" "$TMP" 2>&1 || true)
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
 assert_exit "E1 invalid JSON exits 1" 1 "$RC"
@@ -80,7 +80,7 @@ teardown
 # ─── Test E1: Empty JSON overlay → exit 1 (jq treats {} as valid, empty string not) ──
 echo "--- T03: E1 empty overlay file → exit 1"
 setup
-touch "$TMP/.omcc-overlay.json"
+touch "$TMP/.omk-overlay.json"
 OUT=$(bash "$VALIDATE" "$TMP" 2>&1 || true)
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
 assert_exit "E1 empty file exits 1" 1 "$RC"
@@ -91,7 +91,7 @@ echo "--- T04: E2 extra_skills missing SKILL.md → exit 1"
 setup
 mkdir -p "$TMP/skills/myskill"
 # No SKILL.md inside
-echo '{"extra_skills": ["skills/myskill"]}' > "$TMP/.omcc-overlay.json"
+echo '{"extra_skills": ["skills/myskill"]}' > "$TMP/.omk-overlay.json"
 OUT=$(bash "$VALIDATE" "$TMP" 2>&1 || true)
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
 assert_exit "E2 missing SKILL.md exits 1" 1 "$RC"
@@ -103,7 +103,7 @@ echo "--- T05: E2 extra_skills with SKILL.md → exit 0"
 setup
 mkdir -p "$TMP/skills/myskill"
 printf -- "---\nname: myskill\n---\n# MySkill" > "$TMP/skills/myskill/SKILL.md"
-echo '{"extra_skills": ["skills/myskill"]}' > "$TMP/.omcc-overlay.json"
+echo '{"extra_skills": ["skills/myskill"]}' > "$TMP/.omk-overlay.json"
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
 assert_exit "E2 valid SKILL.md exits 0" 0 "$RC"
 teardown
@@ -114,7 +114,7 @@ setup
 mkdir -p "$TMP/hooks"
 touch "$TMP/hooks/my-hook.sh"
 # Not chmod +x
-echo '{"extra_hooks": {"postToolUse": [{"command": "hooks/my-hook.sh"}]}}' > "$TMP/.omcc-overlay.json"
+echo '{"extra_hooks": {"postToolUse": [{"command": "hooks/my-hook.sh"}]}}' > "$TMP/.omk-overlay.json"
 OUT=$(bash "$VALIDATE" "$TMP" 2>&1 || true)
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
 assert_exit "E3 non-exec hook exits 1" 1 "$RC"
@@ -127,7 +127,7 @@ setup
 mkdir -p "$TMP/hooks"
 printf '#!/bin/bash\nexit 0\n' > "$TMP/hooks/my-hook.sh"
 chmod +x "$TMP/hooks/my-hook.sh"
-echo '{"extra_hooks": {"postToolUse": [{"command": "hooks/my-hook.sh"}]}}' > "$TMP/.omcc-overlay.json"
+echo '{"extra_hooks": {"postToolUse": [{"command": "hooks/my-hook.sh"}]}}' > "$TMP/.omk-overlay.json"
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
 assert_exit "E3 exec hook exits 0" 0 "$RC"
 teardown
@@ -138,7 +138,7 @@ setup
 mkdir -p "$TMP/hooks"
 printf '#!/bin/bash\nexit 0\n' > "$TMP/hooks/my-hook.sh"
 chmod +x "$TMP/hooks/my-hook.sh"
-echo '{"extra_hooks": {"InvalidEvent": ["hooks/my-hook.sh"]}}' > "$TMP/.omcc-overlay.json"
+echo '{"extra_hooks": {"InvalidEvent": ["hooks/my-hook.sh"]}}' > "$TMP/.omk-overlay.json"
 OUT=$(bash "$VALIDATE" "$TMP" 2>&1 || true)
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
 assert_exit "E4 invalid event exits 1" 1 "$RC"
@@ -170,7 +170,7 @@ echo "--- T11: W1 SKILL.md missing frontmatter → warning exit 0"
 setup
 mkdir -p "$TMP/skills/myskill"
 echo "# MySkill (no frontmatter)" > "$TMP/skills/myskill/SKILL.md"
-echo '{"extra_skills": ["skills/myskill"]}' > "$TMP/.omcc-overlay.json"
+echo '{"extra_skills": ["skills/myskill"]}' > "$TMP/.omk-overlay.json"
 OUT=$(bash "$VALIDATE" "$TMP" 2>&1 || true)
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
 assert_exit "W1 missing frontmatter exits 0" 0 "$RC"
@@ -194,7 +194,7 @@ echo "--- T13: E5 skill name conflicts framework skill → exit 1"
 setup
 mkdir -p "$TMP/skills/planning"
 printf -- "---\nname: planning\n---\n# Planning" > "$TMP/skills/planning/SKILL.md"
-echo '{"extra_skills": ["skills/planning"]}' > "$TMP/.omcc-overlay.json"
+echo '{"extra_skills": ["skills/planning"]}' > "$TMP/.omk-overlay.json"
 OUT=$(bash "$VALIDATE" "$TMP" 2>&1 || true)
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
 assert_exit "E5 skill conflict exits 1" 1 "$RC"
@@ -206,9 +206,9 @@ echo "--- T14: W5 AGENTS.md >200 lines → warning exit 0"
 setup
 # Generate 201-line AGENTS.md with BEGIN/END markers
 {
-  echo "<!-- BEGIN OMCC Identity -->"
+  echo "<!-- BEGIN OMK Identity -->"
   for i in $(seq 1 199); do echo "line $i"; done
-  echo "<!-- END OMCC Identity -->"
+  echo "<!-- END OMK Identity -->"
 } > "$TMP/AGENTS.md"
 OUT=$(bash "$VALIDATE" "$TMP" 2>&1 || true)
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)

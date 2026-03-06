@@ -45,14 +45,14 @@ assert_file_exists "coding.md exists" "$TEMPLATES/agents-types/coding.md"
 assert_file_exists "gtm.md exists"    "$TEMPLATES/agents-types/gtm.md"
 
 # ── BEGIN/END markers ────────────────────────────────────────────────────────
-assert_contains "principles BEGIN marker" "BEGIN OMCC PRINCIPLES"   "$TEMPLATES/agents-sections/principles.md"
-assert_contains "principles END marker"   "END OMCC PRINCIPLES"     "$TEMPLATES/agents-sections/principles.md"
-assert_contains "workflow BEGIN marker"   "BEGIN OMCC WORKFLOW"     "$TEMPLATES/agents-sections/workflow.md"
-assert_contains "workflow END marker"     "END OMCC WORKFLOW"       "$TEMPLATES/agents-sections/workflow.md"
-assert_contains "self-learning BEGIN"     "BEGIN OMCC SELF-LEARNING" "$TEMPLATES/agents-sections/self-learning.md"
-assert_contains "self-learning END"       "END OMCC SELF-LEARNING"   "$TEMPLATES/agents-sections/self-learning.md"
-assert_contains "authority BEGIN marker"  "BEGIN OMCC AUTHORITY"    "$TEMPLATES/agents-sections/authority.md"
-assert_contains "authority END marker"    "END OMCC AUTHORITY"      "$TEMPLATES/agents-sections/authority.md"
+assert_contains "principles BEGIN marker" "BEGIN OMK PRINCIPLES"   "$TEMPLATES/agents-sections/principles.md"
+assert_contains "principles END marker"   "END OMK PRINCIPLES"     "$TEMPLATES/agents-sections/principles.md"
+assert_contains "workflow BEGIN marker"   "BEGIN OMK WORKFLOW"     "$TEMPLATES/agents-sections/workflow.md"
+assert_contains "workflow END marker"     "END OMK WORKFLOW"       "$TEMPLATES/agents-sections/workflow.md"
+assert_contains "self-learning BEGIN"     "BEGIN OMK SELF-LEARNING" "$TEMPLATES/agents-sections/self-learning.md"
+assert_contains "self-learning END"       "END OMK SELF-LEARNING"   "$TEMPLATES/agents-sections/self-learning.md"
+assert_contains "authority BEGIN marker"  "BEGIN OMK AUTHORITY"    "$TEMPLATES/agents-sections/authority.md"
+assert_contains "authority END marker"    "END OMK AUTHORITY"      "$TEMPLATES/agents-sections/authority.md"
 
 # ── Key content sanity checks ────────────────────────────────────────────────
 assert_contains "principles has Evidence" "Evidence before claims" "$TEMPLATES/agents-sections/principles.md"
@@ -65,11 +65,11 @@ assert_contains "authority has Authority Matrix" "Authority Matrix" "$TEMPLATES/
 assert_contains "coding has Identity"    "## Identity" "$TEMPLATES/agents-types/coding.md"
 assert_contains "coding has Roles"       "## Roles"    "$TEMPLATES/agents-types/coding.md"
 assert_contains "coding has Domain Rules" "## Domain Rules" "$TEMPLATES/agents-types/coding.md"
-assert_contains "coding references OMCC sections" "OMCC SECTIONS" "$TEMPLATES/agents-types/coding.md"
+assert_contains "coding references OMK sections" "OMK SECTIONS" "$TEMPLATES/agents-types/coding.md"
 assert_contains "gtm has Identity"       "## Identity" "$TEMPLATES/agents-types/gtm.md"
 assert_contains "gtm has Roles"          "## Roles"    "$TEMPLATES/agents-types/gtm.md"
 assert_contains "gtm has Domain Rules"   "## Domain Rules" "$TEMPLATES/agents-types/gtm.md"
-assert_contains "gtm references OMCC sections" "OMCC SECTIONS" "$TEMPLATES/agents-types/gtm.md"
+assert_contains "gtm references OMK sections" "OMK SECTIONS" "$TEMPLATES/agents-types/gtm.md"
 
 # ── Assembled AGENTS.md under 200 lines ──────────────────────────────────────
 # Simulate assembly: concatenate one type template + all section templates

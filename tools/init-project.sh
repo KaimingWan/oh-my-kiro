@@ -1,5 +1,5 @@
 #!/bin/bash
-# Initialize a new project with oh-my-claude-code framework
+# Initialize a new project with oh-my-kiro framework
 # Usage: ./init-project.sh /path/to/project [project-name] [--type coding|gtm] [--knowledge file|openviking]
 
 set -e
@@ -75,13 +75,13 @@ TYPES_DIR="$TEMPLATE_DIR/templates/agents-types"
 TYPE_TEMPLATE="$TYPES_DIR/$PROJECT_TYPE.md"
 
 if [ -d "$SECTIONS_DIR" ] && [ -f "$TYPE_TEMPLATE" ]; then
-  # Assemble: type template + each section listed in OMCC SECTIONS comment
-  # Parse "<!-- OMCC SECTIONS: a b c -->" from type template
-  SECTIONS_LINE=$(grep "OMCC SECTIONS:" "$TYPE_TEMPLATE" | head -1)
-  SECTION_NAMES=$(echo "$SECTIONS_LINE" | sed 's/.*OMCC SECTIONS: *//;s/ *-->.*//')
+  # Assemble: type template + each section listed in OMK SECTIONS comment
+  # Parse "<!-- OMK SECTIONS: a b c -->" from type template
+  SECTIONS_LINE=$(grep "OMK SECTIONS:" "$TYPE_TEMPLATE" | head -1)
+  SECTION_NAMES=$(echo "$SECTIONS_LINE" | sed 's/.*OMK SECTIONS: *//;s/ *-->.*//')
 
-  # Start with type template content (strip the OMCC SECTIONS marker line)
-  grep -v "OMCC SECTIONS:" "$TYPE_TEMPLATE" > "$TARGET/AGENTS.md"
+  # Start with type template content (strip the OMK SECTIONS marker line)
+  grep -v "OMK SECTIONS:" "$TYPE_TEMPLATE" > "$TARGET/AGENTS.md"
 
   # Append each section
   for section in $SECTION_NAMES; do
@@ -104,22 +104,22 @@ else
 fi
 
 # ── Copy framework files ──────────────────────────────────────────────────────
-cp "$TEMPLATE_DIR/.claude/settings.json" "$TARGET/.claude/"
+cp "$TEMPLATE_DIR/.kiro/settings.json" "$TARGET/.kiro/"
 cp "$TEMPLATE_DIR/.kiro/rules/"*.md "$TARGET/.kiro/rules/"
 # Copy hooks (preserving subdirectory structure)
 cp -r "$TEMPLATE_DIR/hooks" "$TARGET/hooks"
 ln -sf ../hooks "$TARGET/.kiro/hooks"
-ln -sf ../hooks "$TARGET/.claude/hooks"
+ln -sf ../hooks "$TARGET/.kiro/hooks"
 cp "$TEMPLATE_DIR/.kiro/agents/"*.json "$TARGET/.kiro/agents/"
 cp "$TEMPLATE_DIR/knowledge/INDEX.md" "$TARGET/knowledge/" 2>/dev/null || true
-# Create episodes.md and rules.md from clean templates (not OMCC's own data)
+# Create episodes.md and rules.md from clean templates (not OMK's own data)
 for tmpl in episodes.md rules.md; do
   if [ -f "$TEMPLATE_DIR/templates/knowledge/$tmpl" ]; then
     cp "$TEMPLATE_DIR/templates/knowledge/$tmpl" "$TARGET/knowledge/$tmpl"
   fi
 done
 cp -r "$TEMPLATE_DIR/knowledge/product" "$TARGET/knowledge/" 2>/dev/null || true
-# Overwrite episodes.md and rules.md with clean templates (no OMCC-specific data)
+# Overwrite episodes.md and rules.md with clean templates (no OMK-specific data)
 if [ -d "$TEMPLATE_DIR/templates/knowledge" ]; then
   cp "$TEMPLATE_DIR/templates/knowledge/episodes.md" "$TARGET/knowledge/episodes.md"
   cp "$TEMPLATE_DIR/templates/knowledge/rules.md" "$TARGET/knowledge/rules.md"
@@ -134,7 +134,7 @@ cp "$TEMPLATE_DIR/.gitignore" "$TARGET/" 2>/dev/null || true
 if [ -d "$TEMPLATE_DIR/skills" ]; then
   cp -r "$TEMPLATE_DIR/skills" "$TARGET/skills"
   ln -sf ../skills "$TARGET/.kiro/skills"
-  ln -sf ../skills "$TARGET/.claude/skills"
+  ln -sf ../skills "$TARGET/.kiro/skills"
   SKILL_COUNT=$(ls -d "$TARGET/skills/"*/ 2>/dev/null | wc -l | tr -d ' ')
   echo "📦 Copied $SKILL_COUNT skills"
 fi
@@ -146,12 +146,12 @@ if [ -d "$TEMPLATE_DIR/commands" ]; then
 fi
 
 # ── Create overlay scaffolding ────────────────────────────────────────────────
-# Empty .omcc-overlay.json for project-specific skill/hook extensions
-if [ ! -f "$TARGET/.omcc-overlay.json" ]; then
+# Empty .omk-overlay.json for project-specific skill/hook extensions
+if [ ! -f "$TARGET/.omk-overlay.json" ]; then
   if [ "$KNOWLEDGE_BACKEND" = "openviking" ]; then
-    printf '{\n  "extra_skills": [],\n  "extra_hooks": {},\n  "knowledge_backend": "openviking",\n  "openviking": {\n    "data_dir": "data/openviking"\n  }\n}\n' > "$TARGET/.omcc-overlay.json"
+    printf '{\n  "extra_skills": [],\n  "extra_hooks": {},\n  "knowledge_backend": "openviking",\n  "openviking": {\n    "data_dir": "data/openviking"\n  }\n}\n' > "$TARGET/.omk-overlay.json"
   else
-    printf '{\n  "extra_skills": [],\n  "extra_hooks": {}\n}\n' > "$TARGET/.omcc-overlay.json"
+    printf '{\n  "extra_skills": [],\n  "extra_hooks": {}\n}\n' > "$TARGET/.omk-overlay.json"
   fi
 fi
 
@@ -178,7 +178,7 @@ echo "  .kiro/hooks/           — Automated guardrails"
 if [ -n "${SKILL_COUNT:-}" ]; then
 echo "  .kiro/skills/          — $SKILL_COUNT pre-installed skills"
 fi
-echo "  .omcc-overlay.json     — Project extension overlay (skills/hooks)"
+echo "  .omk-overlay.json     — Project extension overlay (skills/hooks)"
 echo "  hooks/project/         — Project-specific hooks directory"
 echo "  knowledge/INDEX.md     — Knowledge routing (empty, fill it in)"
 echo "  knowledge/product/     — Product map (features, constraints)"

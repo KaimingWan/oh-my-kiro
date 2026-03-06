@@ -1,14 +1,14 @@
 #!/bin/bash
-# Tests for tools/install-skill.sh and tools/sync-omcc.sh
+# Tests for tools/install-skill.sh and tools/sync-omk.sh
 # Run: bash tests/test-install-skill.sh
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 INSTALL_SKILL="$SCRIPT_DIR/../tools/install-skill.sh"
-SYNC_OMCC="$SCRIPT_DIR/../tools/sync-omcc.sh"
+SYNC_OMK="$SCRIPT_DIR/../tools/sync-omk.sh"
 VALIDATE="$SCRIPT_DIR/../tools/validate-project.sh"
-OMCC_ROOT="$SCRIPT_DIR/.."
+OMK_ROOT="$SCRIPT_DIR/.."
 
 PASS=0
 FAIL=0
@@ -74,7 +74,7 @@ mkdir -p "$TMP/skills/myskill"
 printf -- "---\nname: myskill\n---\n# MySkill\n" > "$TMP/skills/myskill/SKILL.md"
 RC=$(bash "$INSTALL_SKILL" --register-only "$TMP" "skills/myskill" >/dev/null 2>&1; echo $?)
 assert_exit "register-only exits 0" 0 "$RC"
-assert_json_contains "overlay has extra_skills entry" '.extra_skills | index("skills/myskill") != null' "$TMP/.omcc-overlay.json"
+assert_json_contains "overlay has extra_skills entry" '.extra_skills | index("skills/myskill") != null' "$TMP/.omk-overlay.json"
 teardown
 
 echo "--- T02: --register-only appends to existing overlay"
@@ -84,10 +84,10 @@ printf -- "---\nname: myskill\n---\n# MySkill\n" > "$TMP/skills/myskill/SKILL.md
 mkdir -p "$TMP/skills/other"
 printf -- "---\nname: other\n---\n# Other\n" > "$TMP/skills/other/SKILL.md"
 # Pre-create overlay with one skill
-echo '{"extra_skills": ["skills/other"], "extra_hooks": {}}' > "$TMP/.omcc-overlay.json"
+echo '{"extra_skills": ["skills/other"], "extra_hooks": {}}' > "$TMP/.omk-overlay.json"
 bash "$INSTALL_SKILL" --register-only "$TMP" "skills/myskill" >/dev/null 2>&1
-assert_json_contains "overlay still has other skill" '.extra_skills | index("skills/other") != null' "$TMP/.omcc-overlay.json"
-assert_json_contains "overlay has new myskill" '.extra_skills | index("skills/myskill") != null' "$TMP/.omcc-overlay.json"
+assert_json_contains "overlay still has other skill" '.extra_skills | index("skills/other") != null' "$TMP/.omk-overlay.json"
+assert_json_contains "overlay has new myskill" '.extra_skills | index("skills/myskill") != null' "$TMP/.omk-overlay.json"
 teardown
 
 echo "--- T03: --register-only is idempotent (no duplicate entries)"
@@ -96,7 +96,7 @@ mkdir -p "$TMP/skills/myskill"
 printf -- "---\nname: myskill\n---\n# MySkill\n" > "$TMP/skills/myskill/SKILL.md"
 bash "$INSTALL_SKILL" --register-only "$TMP" "skills/myskill" >/dev/null 2>&1
 bash "$INSTALL_SKILL" --register-only "$TMP" "skills/myskill" >/dev/null 2>&1
-COUNT=$(jq '[.extra_skills[] | select(. == "skills/myskill")] | length' "$TMP/.omcc-overlay.json")
+COUNT=$(jq '[.extra_skills[] | select(. == "skills/myskill")] | length' "$TMP/.omk-overlay.json")
 if [ "$COUNT" -eq 1 ]; then
   echo "  PASS: idempotent — skill registered once"
   PASS=$((PASS + 1))
@@ -130,56 +130,56 @@ printf -- "---\nname: myskill\n---\n# MySkill\n" > "$TMP/skills/myskill/SKILL.md
 # Use absolute path
 RC=$(bash "$INSTALL_SKILL" --register-only "$TMP" "$TMP/skills/myskill" >/dev/null 2>&1; echo $?)
 assert_exit "register-only exits 0 with absolute path" 0 "$RC"
-assert_json_contains "overlay has skill (absolute path)" '.extra_skills | length >= 1' "$TMP/.omcc-overlay.json"
+assert_json_contains "overlay has skill (absolute path)" '.extra_skills | length >= 1' "$TMP/.omk-overlay.json"
 teardown
 
-# ─── sync-omcc.sh tests ───────────────────────────────────────────────────────
+# ─── sync-omk.sh tests ───────────────────────────────────────────────────────
 
-echo "--- T07: sync-omcc calls validate before generate (fails on invalid overlay)"
+echo "--- T07: sync-omk calls validate before generate (fails on invalid overlay)"
 setup
 # Create invalid JSON overlay to trigger validation failure
-echo "{invalid json" > "$TMP/.omcc-overlay.json"
-OUT=$(bash "$SYNC_OMCC" "$TMP" 2>&1 || true)
-RC=$(bash "$SYNC_OMCC" "$TMP" >/dev/null 2>&1; echo $?)
-assert_exit "sync-omcc exits 1 on validation failure" 1 "$RC"
-assert_output_contains "sync-omcc reports validation failure" "alid" "$OUT"
+echo "{invalid json" > "$TMP/.omk-overlay.json"
+OUT=$(bash "$SYNC_OMK" "$TMP" 2>&1 || true)
+RC=$(bash "$SYNC_OMK" "$TMP" >/dev/null 2>&1; echo $?)
+assert_exit "sync-omk exits 1 on validation failure" 1 "$RC"
+assert_output_contains "sync-omk reports validation failure" "alid" "$OUT"
 teardown
 
-echo "--- T08: sync-omcc passes for valid project (no overlay)"
+echo "--- T08: sync-omk passes for valid project (no overlay)"
 setup
-# sync-omcc will call validate (passes), then generate_configs
+# sync-omk will call validate (passes), then generate_configs
 # generate_configs with --project-root needs --skip-validate flag which it has
 # But it may fail if generate_configs has other requirements; test validate step at least
 # We detect the validate step ran by injecting a broken overlay and seeing it fail
-OUT=$(bash "$SYNC_OMCC" "$TMP" 2>&1 || true)
-RC=$(bash "$SYNC_OMCC" "$TMP" >/dev/null 2>&1; echo $?)
-# sync-omcc may fail at generate step if generate_configs has requirements not met
+OUT=$(bash "$SYNC_OMK" "$TMP" 2>&1 || true)
+RC=$(bash "$SYNC_OMK" "$TMP" >/dev/null 2>&1; echo $?)
+# sync-omk may fail at generate step if generate_configs has requirements not met
 # The key assertion is that validate step was called (logged) before generate
-assert_output_contains "sync-omcc reports Step 2 validate" "Step 2" "$OUT"
+assert_output_contains "sync-omk reports Step 2 validate" "Step 2" "$OUT"
 teardown
 
-echo "--- T09: sync-omcc validate step runs BEFORE generate step"
+echo "--- T09: sync-omk validate step runs BEFORE generate step"
 setup
 # Make validation fail → generate step should never run
 # We detect this by checking that generate step output is absent
-echo "{bad json}" > "$TMP/.omcc-overlay.json"
-OUT=$(bash "$SYNC_OMCC" "$TMP" 2>&1 || true)
+echo "{bad json}" > "$TMP/.omk-overlay.json"
+OUT=$(bash "$SYNC_OMK" "$TMP" 2>&1 || true)
 # Step 2 fail message should appear
 assert_output_contains "validate step mentioned in output" "Step 2" "$OUT"
 # Step 3 generate step should NOT appear (validation blocked it)
 if echo "$OUT" | grep -q "Step 3"; then
-  echo "  FAIL: sync-omcc reached Step 3 despite validation failure"
+  echo "  FAIL: sync-omk reached Step 3 despite validation failure"
   FAIL=$((FAIL + 1))
 else
-  echo "  PASS: sync-omcc stopped at Step 2, did not reach Step 3"
+  echo "  PASS: sync-omk stopped at Step 2, did not reach Step 3"
   PASS=$((PASS + 1))
 fi
 teardown
 
-echo "--- T10: sync-omcc fails for non-existent project root"
-OUT=$(bash "$SYNC_OMCC" "/nonexistent/path/$(date +%s)" 2>&1 || true)
-RC=$(bash "$SYNC_OMCC" "/nonexistent/path/$(date +%s)" >/dev/null 2>&1; echo $?)
-assert_exit "sync-omcc exits 1 for bad project root" 1 "$RC"
+echo "--- T10: sync-omk fails for non-existent project root"
+OUT=$(bash "$SYNC_OMK" "/nonexistent/path/$(date +%s)" 2>&1 || true)
+RC=$(bash "$SYNC_OMK" "/nonexistent/path/$(date +%s)" >/dev/null 2>&1; echo $?)
+assert_exit "sync-omk exits 1 for bad project root" 1 "$RC"
 
 # ─── Summary ──────────────────────────────────────────────────────────────────
 echo ""

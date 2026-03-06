@@ -68,14 +68,14 @@ test_type_coding() {
     fail "--type coding: coding identity missing"
   fi
 
-  # Should contain OMCC sections (assembled)
-  if grep -q "BEGIN OMCC PRINCIPLES" "$target/AGENTS.md" 2>/dev/null; then
+  # Should contain OMK sections (assembled)
+  if grep -q "BEGIN OMK PRINCIPLES" "$target/AGENTS.md" 2>/dev/null; then
     pass "--type coding: principles section present"
   else
     fail "--type coding: principles section missing"
   fi
 
-  if grep -q "BEGIN OMCC WORKFLOW" "$target/AGENTS.md" 2>/dev/null; then
+  if grep -q "BEGIN OMK WORKFLOW" "$target/AGENTS.md" 2>/dev/null; then
     pass "--type coding: workflow section present"
   else
     fail "--type coding: workflow section missing"
@@ -114,14 +114,14 @@ test_type_gtm() {
     fail "--type gtm: GTM identity missing"
   fi
 
-  if grep -q "BEGIN OMCC PRINCIPLES" "$target/AGENTS.md" 2>/dev/null; then
+  if grep -q "BEGIN OMK PRINCIPLES" "$target/AGENTS.md" 2>/dev/null; then
     pass "--type gtm: principles section present"
   else
     fail "--type gtm: principles section missing"
   fi
 }
 
-# ── Test: creates .omcc-overlay.json ────────────────────────────────────────
+# ── Test: creates .omk-overlay.json ────────────────────────────────────────
 test_overlay_json_created() {
   local target
   target=$(make_target)
@@ -129,16 +129,16 @@ test_overlay_json_created() {
 
   bash "$INIT_SCRIPT" "$target" "OverlayProj" >/dev/null 2>&1
 
-  if [ -f "$target/.omcc-overlay.json" ]; then
-    pass "overlay: .omcc-overlay.json created"
+  if [ -f "$target/.omk-overlay.json" ]; then
+    pass "overlay: .omk-overlay.json created"
     # Must be valid JSON
-    if jq . "$target/.omcc-overlay.json" >/dev/null 2>&1; then
-      pass "overlay: .omcc-overlay.json is valid JSON"
+    if jq . "$target/.omk-overlay.json" >/dev/null 2>&1; then
+      pass "overlay: .omk-overlay.json is valid JSON"
     else
-      fail "overlay: .omcc-overlay.json is invalid JSON"
+      fail "overlay: .omk-overlay.json is invalid JSON"
     fi
   else
-    fail "overlay: .omcc-overlay.json missing"
+    fail "overlay: .omk-overlay.json missing"
   fi
 }
 
@@ -199,7 +199,7 @@ test_fallback_no_templates() {
   fake_root=$(make_target)
   trap "cleanup '$target'; cleanup '$fake_root'" RETURN
 
-  # Set up minimal fake OMCC root (no templates/)
+  # Set up minimal fake OMK root (no templates/)
   cp "$ROOT_DIR/CLAUDE.md" "$fake_root/"
   cp "$ROOT_DIR/AGENTS.md" "$fake_root/"
   mkdir -p "$fake_root/.claude" && cp "$ROOT_DIR/.claude/settings.json" "$fake_root/.claude/"
@@ -211,7 +211,7 @@ test_fallback_no_templates() {
   cp "$ROOT_DIR/.gitignore" "$fake_root/" 2>/dev/null || true
 
   # Run init pointing to fake_root as the template dir (override via env or symlink trick)
-  # We do this by temporarily symlinking; instead use OMCC_ROOT env var if supported,
+  # We do this by temporarily symlinking; instead use OMK_ROOT env var if supported,
   # or just run with the script from fake_root
   # Since the script uses dirname-based TEMPLATE_DIR, symlink the script
   local fake_script="$fake_root/tools/init-project.sh"
@@ -238,7 +238,7 @@ echo ""
 run_test "Default (no --type) backward compatible" test_default_no_type
 run_test "--type coding assembles AGENTS.md" test_type_coding
 run_test "--type gtm assembles AGENTS.md" test_type_gtm
-run_test "Creates .omcc-overlay.json" test_overlay_json_created
+run_test "Creates .omk-overlay.json" test_overlay_json_created
 run_test "Creates hooks/project/ directory" test_hooks_project_dir
 run_test "Copies EXTENSION-GUIDE.md if exists" test_extension_guide_copied
 run_test "Aborts if AGENTS.md already exists" test_abort_if_exists
