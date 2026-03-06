@@ -12,6 +12,7 @@
 | Workspace boundary | `hooks/security/block-outside-workspace.sh` | preToolUse[bash,write] | block |
 | Pre-write gate (workflow + injection scan + plan context) | `hooks/gate/pre-write.sh` | preToolUse[write] | block + inject |
 | Ralph loop enforcer | `hooks/gate/enforce-ralph-loop.sh` | preToolUse[bash,write] | block |
+| OV-first enforcer | `hooks/gate/enforce-ov-first.sh` | preToolUse[bash] | block |
 | Work directory enforcer | `hooks/gate/enforce-work-dir.sh` | preToolUse[write] | block |
 | Regression requirement | `hooks/gate/require-regression.sh` | preToolUse[bash] | block |
 | Post-write feedback (lint + test + progress remind) | `hooks/feedback/post-write.sh` | postToolUse[write] | feedback |
@@ -35,4 +36,4 @@
 ## Config Generation
 
 Single source: `scripts/generate_configs.py`
-Generates: `.claude/settings.json` + `.kiro/agents/*.json` + `.claude/agents/*.md`
+Generates: `.kiro/settings.json` + `.kiro/agents/*.json` + `.kiro/agents/*.md`
