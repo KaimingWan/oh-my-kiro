@@ -17,7 +17,7 @@ import socket
 import sys
 from pathlib import Path
 
-# OMK_PROJECT_DIR is set by hooks; fallback: two levels up from this script's .omcc location
+# OMK_PROJECT_DIR is set by hooks; fallback: two levels up from this script's .omk location
 PROJECT_DIR = Path(os.environ.get("OMK_PROJECT_DIR", Path(__file__).resolve().parent.parent.parent))
 LESSONS_FILE = PROJECT_DIR / "knowledge" / "lessons-learned.md"
 SCENARIOS_DIR = PROJECT_DIR / "knowledge" / "lesson-scenarios"
