@@ -17,6 +17,10 @@ err() { echo "ERROR: $*" >&2; ERRORS=$((ERRORS + 1)); }
 warn() { echo "WARNING: $*"; WARNINGS=$((WARNINGS + 1)); }
 
 OVERLAY_FILE="$PROJECT_ROOT/.omk-overlay.json"
+if [ ! -f "$OVERLAY_FILE" ] && [ -f "$PROJECT_ROOT/.omcc-overlay.json" ]; then
+  echo "⚠️  .omcc-overlay.json is deprecated, rename to .omk-overlay.json"
+  OVERLAY_FILE="$PROJECT_ROOT/.omcc-overlay.json"
+fi
 
 # Valid hook event names (camelCase — canonical overlay format)
 VALID_EVENTS="agentSpawn userPromptSubmit preToolUse postToolUse stop"
