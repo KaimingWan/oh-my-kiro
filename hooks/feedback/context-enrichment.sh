@@ -13,7 +13,7 @@ WS_HASH=$(pwd | shasum 2>/dev/null | cut -c1-8 || echo 'default')
 # ── 60s dedup: skip if enrichment ran within last 60s ──
 DEDUP_FILE="/tmp/ctx-enrich-${WS_HASH}.ts"
 NOW=$(date +%s)
-if [ -f "$DEDUP_FILE" ]; then
+if [ -z "${CTX_ENRICH_SKIP_DEDUP:-}" ] && [ -f "$DEDUP_FILE" ]; then
   LAST=$(cat "$DEDUP_FILE" 2>/dev/null || echo 0)
   if [ $((NOW - LAST)) -lt 60 ]; then
     exit 0
