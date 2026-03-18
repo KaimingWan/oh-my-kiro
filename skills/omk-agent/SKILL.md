@@ -1,9 +1,16 @@
 ---
 name: omk-agent
-description: "Distill a top-level principle into knowledge/rules.md. Use when capturing architectural decisions, workflow principles, or behavioral guidelines."
+description: "Distill a top-level principle into knowledge/rules.md. Trigger when user says 'add rule', 'new principle', 'enforce this', '@agent', or wants to codify an architectural decision, workflow principle, or behavioral guideline into persistent rules."
 argument-hint: "[principle to capture]"
 disable-model-invocation: true
 ---
+
+## Trigger Examples
+- "@agent 所有 JSON 操作必须用 jq"
+- "add this as a permanent rule"
+- "enforce: never skip tests"
+- "把这个原则写进规则"
+- "@agent submodule 修改必须走 worktree"
 
 # Agent — Distill Top-Level Principle
 

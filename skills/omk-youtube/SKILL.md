@@ -1,7 +1,14 @@
 ---
 name: omk-youtube
-description: "Extract and summarize YouTube video content via subtitle extraction. Triggered when user shares a YouTube link and wants a summary."
+description: "Extract and summarize YouTube video content via subtitle extraction. Trigger when user shares a YouTube URL (youtube.com or youtu.be), says 'summarize this video', 'watch this', '看看这个视频', or wants to understand video content without watching. Also trigger for video transcript extraction."
 ---
+
+## Trigger Examples
+- "帮我看看这个视频讲了什么 https://youtube.com/watch?v=xxx"
+- "summarize this YouTube video"
+- "提取这个视频的字幕"
+- "这个 talk 讲了什么？ https://youtu.be/xxx"
+- "translate this video's content to Chinese"
 
 # YouTube Subtitle Extraction
 

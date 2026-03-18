@@ -1,9 +1,16 @@
 ---
 name: omk-coding
-description: "Enforces coding best practices when writing or modifying code: LSP initialization, TDD, minimal changes, self-review, and verification. Auto-triggered when entering a code-heavy worktree or submodule."
+description: "Enforces coding best practices: LSP init, TDD red-green-refactor, minimal changes, self-review, verification. Trigger when writing code, modifying source files, fixing bugs, refactoring, entering a worktree or submodule, or when user says 'write code', 'implement', 'fix this', 'add feature', 'refactor'. Also trigger when creating/editing .java .py .ts .js .go .rs .sh files."
 ---
 
 # Coding — Write Code Right
+
+## Trigger Examples
+- "帮我实现这个功能"
+- "fix this bug in the auth module"
+- "重构一下这段代码"
+- "write a Python script to parse CSV"
+- "add error handling to this function"
 
 ## Overview
 

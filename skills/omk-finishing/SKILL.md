@@ -1,7 +1,14 @@
 ---
 name: omk-finishing
-description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
+description: "Branch completion workflow: verify tests → present 4 options (merge/PR/keep/discard) → execute → cleanup worktree. Trigger when implementation is complete, all tests pass, user says 'done', 'finish', 'merge', 'create PR', 'push', 'wrap up', '@cpu', or when ready to integrate work back to main branch."
 ---
+
+## Trigger Examples
+- "代码写完了，帮我合并"
+- "push and create a PR"
+- "这个分支可以收了"
+- "wrap up this feature branch"
+- "discard this work, start over"
 
 # Finishing a Development Branch
 

@@ -1,7 +1,14 @@
 ---
 name: omk-self-reflect
-description: "Handles promotion of episodes to rules, and complex insight capture that auto-capture can't handle."
+description: "Agent self-learning: promote recurring episodes to rules, capture complex corrections. Trigger when hook outputs 🔥 or ⬆️ (promotion needed), 🚨 (complex correction), or when user says 'reflect', 'learn from this', 'remember this', 'always do X', 'never do Y', '@reflect'. Also trigger when same mistake pattern appears ≥3 times in episodes."
 ---
+
+## Trigger Examples
+- "记住，以后都要这样做"
+- "always use jq for JSON, never sed"
+- "@reflect 把这个教训沉淀一下"
+- "I told you this before, capture it"
+- "这个错误犯了好几次了，升级成规则"
 
 # Self-Reflect — Agent Self-Learning System
 

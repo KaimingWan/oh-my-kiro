@@ -1,9 +1,16 @@
 ---
 name: omk-know
-description: "Capture knowledge into episodes.md. Use when preserving insights, lessons learned, or corrections from the current conversation."
+description: "Capture knowledge into episodes.md. Trigger when user says 'remember', 'capture this', 'lesson learned', 'note this', '@know', or when preserving insights, corrections, or discoveries from the current conversation."
 argument-hint: "[insight to capture]"
 disable-model-invocation: true
 ---
+
+## Trigger Examples
+- "@know macOS stat 用 -f 不用 -c"
+- "记一下这个坑"
+- "capture this lesson"
+- "note: this API requires auth header"
+- "@know HubSpot API 有 rate limit 100/10s"
 
 # Know — Knowledge Capture
 

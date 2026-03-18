@@ -1,7 +1,14 @@
 ---
 name: omk-reviewing
-description: "Code review — covers requesting, executing, and receiving code reviews."
+description: "Code and plan review with multi-angle dispatch. Trigger when user says 'review', 'code review', 'check my code', 'PR review', '@review', or when completing a plan phase that requires review. Also trigger before merge, after major feature completion, or when user asks for feedback on implementation quality."
 ---
+
+## Trigger Examples
+- "@review 看看这个 PR"
+- "帮我 review 一下这段代码"
+- "check my implementation before I merge"
+- "review the plan I just wrote"
+- "这个改动有没有问题？"
 
 # Reviewing — Request, Execute, Receive
 

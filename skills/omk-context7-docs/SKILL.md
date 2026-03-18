@@ -1,7 +1,14 @@
 ---
 name: documentation-lookup
-description: This skill should be used when the user asks about libraries, frameworks, API references, or needs code examples. Activates for setup questions, code generation involving libraries, or mentions of specific frameworks like React, Vue, Next.js, Prisma, Supabase, etc.
+description: "Fetch current library/framework documentation via Context7. Trigger when user asks about libraries, frameworks, API references, code examples, setup/configuration, or mentions specific frameworks like React, Vue, Next.js, Prisma, Supabase, Express, Tailwind, Django, FastAPI, Spring Boot, etc. Also trigger when user says 'how to use', 'API docs', 'latest syntax', or needs code involving third-party packages."
 ---
+
+## Trigger Examples
+- "Next.js 15 的 middleware 怎么配？"
+- "show me the Prisma query syntax for upsert"
+- "React 19 有什么新 API？"
+- "how do I set up Supabase auth?"
+- "Tailwind 的 grid 怎么用？"
 
 When the user asks about libraries, frameworks, or needs code examples, use Context7 to fetch current documentation instead of relying on training data.
 

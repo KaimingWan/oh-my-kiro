@@ -1,7 +1,14 @@
 ---
 name: omk-research
-description: "Multi-level research with automatic fallback. Web search → Deep research API. Use when you need comprehensive research grounded in web data."
+description: "Multi-level research: built-in knowledge → web search → Tavily deep research API. Trigger when user says 'research', 'investigate', 'find out', 'compare', 'what is', 'how does X work', 'competitive analysis', 'market research', '@research', or needs information beyond the current codebase and knowledge base."
 ---
+
+## Trigger Examples
+- "@research AutoMQ vs Confluent 对比"
+- "帮我调研一下这个库怎么用"
+- "find out how competitors handle this"
+- "what's the best practice for X in 2026?"
+- "compare these three approaches"
 
 # Research Skill — Multi-Level Search
 

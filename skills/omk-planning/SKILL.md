@@ -1,7 +1,14 @@
 ---
 name: omk-planning
-description: "Write and execute implementation plans. Covers: plan writing, TDD task structure, execution strategies (sequential/parallel/subagent), and git worktree isolation."
+description: "Full plan lifecycle: deep understanding → write plan with TDD checklist → parallel review → Ralph Loop execution. Trigger when user says 'plan', 'design', 'implement', 'build', 'architect', '@plan', '@execute', or describes a multi-step task that needs structured breakdown. Also trigger for feature requests, system redesigns, or migration projects."
 ---
+
+## Trigger Examples
+- "@plan 重构 hook 系统"
+- "I want to add OAuth support, help me plan it"
+- "设计一个新的 knowledge 同步方案"
+- "@execute 继续执行计划"
+- "break this feature into tasks"
 
 # Planning — Write, Review, Execute
 

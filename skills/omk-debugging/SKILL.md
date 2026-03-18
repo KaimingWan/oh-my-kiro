@@ -1,7 +1,14 @@
 ---
 name: omk-debugging
-description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
+description: "Systematic debugging: reproduce → hypothesize → verify → fix. Trigger when encountering bugs, test failures, errors, crashes, unexpected behavior, or when user says 'debug', 'not working', 'broken', 'fails', 'error', 'exception', 'why does this happen', 'investigate'. Also trigger on stack traces, error logs, or non-zero exit codes."
 ---
+
+## Trigger Examples
+- "这个测试跑不过"
+- "why is this returning null?"
+- "报错了，帮我看看"
+- "build fails with exit code 1"
+- "investigate why the hook isn't firing"
 
 # Systematic Debugging
 

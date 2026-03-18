@@ -1,7 +1,14 @@
 ---
 name: omk-verification
-description: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
+description: "Evidence before claims — run verification commands before any completion/success statement. Trigger when about to claim 'done', 'fixed', 'passing', 'complete', 'works now', before committing, creating PRs, or moving to next task. Also trigger when expressing satisfaction like 'great', 'perfect', or any positive assessment of work state without fresh evidence."
 ---
+
+## Trigger Examples
+- "我觉得改好了" → 先跑验证
+- "tests should pass now" → 先跑验证
+- "准备提 PR 了" → 先跑验证
+- "this fix looks correct" → 先跑验证
+- "done, moving to next task" → 先跑验证
 
 # Verification Before Completion
 
