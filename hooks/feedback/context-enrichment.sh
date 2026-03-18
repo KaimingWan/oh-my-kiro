@@ -61,6 +61,20 @@ if echo "$USER_MSG" | grep -qE '(plan|计划|整理|梳理|沉淀|规划|方案|
   fi
 fi
 
+# ── Data-driven skill routing (for skills without hardcoded blocks) ──
+SKILL_DIRS="skills/*/SKILL.md"
+HARDCODED_SKILLS="research|debugging|coding|reviewing|planning"
+for skill_file in $SKILL_DIRS; do
+  [ -f "$skill_file" ] || continue
+  skill_name=$(sed -n 's/^name: *//p' "$skill_file" | head -1 | tr -d '"')
+  echo "$skill_name" | grep -qE "$HARDCODED_SKILLS" && continue
+  triggers=$(sed -n 's/^triggers: *"\{0,1\}\([^"]*\)"\{0,1\}/\1/p' "$skill_file" | head -1)
+  [ -z "$triggers" ] && continue
+  if echo "$USER_MSG" | grep -qiE "$triggers"; then
+    emit "🔍 ${skill_name} detected → read ${skill_file} for guidance."
+  fi
+done
+
 # @execute command — force ralph loop
 if echo "$USER_MSG" | grep -qE '^@execute|^/execute'; then
   PLAN_POINTER="docs/plans/.active"
