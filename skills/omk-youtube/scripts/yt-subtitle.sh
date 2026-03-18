@@ -5,7 +5,7 @@
 #   output_file: save to file instead of stdout
 # Exit 0: success / Exit 1: error
 
-set -euo pipefail
+set -uo pipefail
 
 URL="${1:-}"
 LANG="${2:-en}"
@@ -22,23 +22,24 @@ if ! command -v yt-dlp &>/dev/null; then
   exit 1
 fi
 
-TMPDIR=$(mktemp -d)
-trap 'rm -rf "$TMPDIR"' EXIT
+WORK_DIR=$(mktemp -d)
+cleanup() { [ -d "$WORK_DIR" ] && mv "$WORK_DIR" ~/.Trash/ 2>/dev/null || true; }
+trap cleanup EXIT
 
 # Try manual subtitles first, then auto-generated
 SUB_FILE=""
 for FLAG in "--write-sub" "--write-auto-sub"; do
   yt-dlp $FLAG --sub-lang "$LANG" --sub-format srt --skip-download \
-    -o "$TMPDIR/sub" "$URL" >&2 2>&1 || true
-  SUB_FILE=$(ls "$TMPDIR"/sub*.srt 2>/dev/null | head -1)
+    -o "$WORK_DIR/sub" "$URL" >/dev/null 2>&1 || true
+  SUB_FILE=$(ls "$WORK_DIR"/sub*.srt 2>/dev/null | head -1)
   [ -n "$SUB_FILE" ] && break
 done
 
 # Fallback: if requested lang not found, try auto-translated from English
 if [ -z "$SUB_FILE" ] && [ "$LANG" != "en" ]; then
   yt-dlp --write-auto-sub --sub-lang "${LANG}-en,en" --sub-format srt --skip-download \
-    -o "$TMPDIR/sub" "$URL" >&2 2>&1 || true
-  SUB_FILE=$(ls "$TMPDIR"/sub*.srt 2>/dev/null | head -1)
+    -o "$WORK_DIR/sub" "$URL" >/dev/null 2>&1 || true
+  SUB_FILE=$(ls "$WORK_DIR"/sub*.srt 2>/dev/null | head -1)
 fi
 
 if [ -z "$SUB_FILE" ]; then
