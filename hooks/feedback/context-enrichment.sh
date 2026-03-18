@@ -221,21 +221,35 @@ elif [ -f "$RULES_FILE" ] && [ -s "$RULES_FILE" ]; then
   fi
 fi
 
-# ── Layer 3: Episode index hints (count only) ──
-if [ -f "knowledge/episodes.md" ]; then
+# ── Layer 3: Episode index hints (with top hit) ──
+EP_FILES=""
+[ -f "knowledge/episodes.md" ] && EP_FILES="knowledge/episodes.md"
+[ -f "oh-my-kiro/knowledge/episodes.md" ] && EP_FILES="$EP_FILES oh-my-kiro/knowledge/episodes.md"
+if [ -n "$EP_FILES" ]; then
   MSG_LOWER=$(echo "$USER_MSG" | tr '[:upper:]' '[:lower:]')
   EP_COUNT=0
-  while IFS='|' read -r date status keywords summary; do
-    status=$(echo "$status" | tr -d ' ')
-    [ "$status" != "active" ] && continue
-    for kw in $(echo "$keywords" | tr ',' '\n' | sed 's/^ *//;s/ *$//'); do
-      if echo "$MSG_LOWER" | grep -qiw "$kw"; then
-        EP_COUNT=$((EP_COUNT + 1))
-        break
-      fi
-    done
-  done < <(grep '| active |' "knowledge/episodes.md" 2>/dev/null)
-  [ "$EP_COUNT" -gt 0 ] && emit "📌 $EP_COUNT related episodes found"
+  TOP_SUMMARY="" TOP_HITS=0
+  for ep_file in $EP_FILES; do
+    while IFS='|' read -r date status keywords summary; do
+      status=$(echo "$status" | tr -d ' ')
+      [ "$status" != "active" ] && continue
+      for kw in $(echo "$keywords" | tr ',' '\n' | sed 's/^ *//;s/ *$//'); do
+        if echo "$MSG_LOWER" | grep -qiw "$kw"; then
+          EP_COUNT=$((EP_COUNT + 1))
+          ep_hits=1
+          case "$summary" in *"[hits:"*) ep_hits=$(echo "$summary" | sed -n 's/.*\[hits:\([0-9]*\)\].*/\1/p'); ep_hits=${ep_hits:-1} ;; esac
+          if [ "$ep_hits" -gt "$TOP_HITS" ]; then
+            TOP_HITS=$ep_hits
+            TOP_SUMMARY=$(echo "$summary" | sed 's/^ *//;s/ *\[hits:[0-9]*\] *$//' | cut -c1-60)
+          fi
+          break
+        fi
+      done
+    done < <(grep '| active |' "$ep_file" 2>/dev/null)
+  done
+  if [ "$EP_COUNT" -gt 0 ]; then
+    emit "📌 $EP_COUNT related episodes found (top: \"${TOP_SUMMARY}\" [hits:${TOP_HITS}])"
+  fi
 fi
 
 # ── Layer 4: OpenViking semantic search ──
@@ -295,13 +309,13 @@ fi
 if [ -n "$OUTPUT" ]; then
   LINE_COUNT=$(echo "$OUTPUT" | wc -l | tr -d ' ')
   if [ "$LINE_COUNT" -gt 8 ]; then
-    echo "$OUTPUT" | head -8
-    echo "...($((LINE_COUNT - 8)) lines truncated)"
+    echo "$OUTPUT" | head -7
+    echo "...($((LINE_COUNT - 7)) lines truncated)"
   else
     echo "$OUTPUT"
   fi
 fi
 
-run_project_extensions
+run_project_extensions 2>/dev/null || true
 
 exit 0

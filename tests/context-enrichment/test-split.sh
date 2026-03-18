@@ -4,7 +4,7 @@ cd "$(git rev-parse --show-toplevel)"
 PASS=0; FAIL=0
 t() {
   local desc="$1"; shift
-  if eval "$@" >/dev/null 2>&1; then echo "PASS: $desc"; PASS=$((PASS+1))
+  if (set +o pipefail; eval "$@") >/dev/null 2>&1; then echo "PASS: $desc"; PASS=$((PASS+1))
   else echo "FAIL: $desc"; FAIL=$((FAIL+1)); fi
 }
 t "correction-detect.sh exists" "test -x hooks/feedback/correction-detect.sh"
