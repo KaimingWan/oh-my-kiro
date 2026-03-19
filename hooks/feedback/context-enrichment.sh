@@ -61,6 +61,11 @@ if echo "$USER_MSG" | grep -qE '(plan|计划|整理|梳理|沉淀|规划|方案|
   fi
 fi
 
+# Skill creation/modification reminder
+if echo "$USER_MSG" | grep -qiE '(create skill|new skill|write.*skill|make.*skill|创建.*skill|写.*skill|skillify|改.*skill|修改.*skill|improve.*skill|优化.*skill)'; then
+  emit "🛠️ Skill work detected → read skills/omk-skill-creation/SKILL.md for skill creation/modification best practices."
+fi
+
 # ── Data-driven skill routing (for skills without hardcoded blocks) ──
 SKILL_DIRS="skills/*/SKILL.md"
 HARDCODED_SKILLS="research|debugging|coding|reviewing|planning"
