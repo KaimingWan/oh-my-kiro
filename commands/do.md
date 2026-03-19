@@ -42,3 +42,4 @@ If the conversation has gone ≥ 3 turns on this task:
 
 ---
 User's task:
+(The user's next message is the task. If this is the first message after @do was invoked and no task appears above, wait for the user's next message — it will contain the task. Do NOT ask "what do you want to do?" — the user already knows they need to provide input after @do.)
