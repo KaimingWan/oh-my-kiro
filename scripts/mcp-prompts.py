@@ -225,6 +225,50 @@ User's requirement:
 {content}
 """
 
+REVIEW_PROMPT = """\
+# @review — Code Review
+
+Dispatch a code review following `skills/omk-reviewing/SKILL.md`.
+
+## Scope
+{content}
+
+## Steps
+
+### 1) Determine diff range
+- If user provided a diff range (e.g., `main..HEAD`), use it
+- If user said "review this PR" or similar, detect: `git merge-base main HEAD`..`HEAD`
+- If no range specified, review all uncommitted + staged changes: `git diff HEAD`
+- Run `git diff --stat <range>` to understand scope
+
+### 2) Dispatch reviewer subagent
+
+Dispatch **1 reviewer subagent** (`agent_name: "reviewer"`) with this query:
+
+```
+Review the code changes in range <RANGE>.
+
+You MUST read and follow these reference checklists:
+- skills/omk-reviewing/references/solid-checklist.md
+- skills/omk-reviewing/references/security-checklist.md
+- skills/omk-reviewing/references/code-quality-checklist.md
+- skills/omk-reviewing/references/removal-plan.md
+- skills/omk-reviewing/references/output-format.md
+
+Execute the 7-step review process from skills/omk-reviewing/SKILL.md "Executing Code Review" section:
+1) Preflight: git diff --stat then git diff. If >500 lines, batch by module.
+2) SOLID + architecture check (load solid-checklist.md)
+3) Security scan (load security-checklist.md)
+4) Code quality scan (load code-quality-checklist.md)
+5) Removal candidates (load removal-plan.md)
+6) Output findings using output-format.md (P0/P1/P2/P3)
+7) Present next steps — do NOT implement changes until user confirms
+```
+
+### 3) Report findings
+Present the reviewer's findings to the user. Follow the "Receiving Review" section of the skill for handling feedback.
+"""
+
 CPR_PROMPT = """\
 Commit all changes, push to remote, and create a Pull Request. (CPR = Commit Push PR)
 
@@ -333,6 +377,12 @@ def research(content: str = "") -> str:
 def ck(content: str = "") -> str:
     """Checkout a branch into a submodule worktree. Pass branch name or keyword to fuzzy search."""
     return CK_PROMPT.replace("{content}", content or "(no branch specified — list recent branches)")
+
+
+@mcp.prompt()
+def review(content: str = "") -> str:
+    """Code review with SOLID, security, quality, and removal checks. Pass diff range or description."""
+    return REVIEW_PROMPT.replace("{content}", content or "(no scope specified — review all uncommitted changes)")
 
 
 @mcp.prompt()
