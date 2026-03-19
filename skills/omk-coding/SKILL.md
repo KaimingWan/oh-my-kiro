@@ -1,6 +1,6 @@
 ---
 name: omk-coding
-description: "Enforces coding best practices: LSP init, TDD red-green-refactor, minimal changes, self-review, verification. Trigger when writing code, modifying source files, fixing bugs, refactoring, entering a worktree or submodule, or when user says 'write code', 'implement', 'fix this', 'add feature', 'refactor'. Also trigger when creating/editing .java .py .ts .js .go .rs .sh files."
+description: "Enforces coding best practices: deep-read before modify, LSP-first navigation, TDD red-green-refactor, minimal changes, self-review, verification. Trigger when writing code, modifying source files, fixing bugs, refactoring, optimizing code, entering a worktree or submodule, or when user says 'write code', 'implement', 'fix this', 'fix PR', 'add feature', 'add field', 'refactor', 'optimize', 'modify', 'change this', 'update code', 'apply feedback', 'apply review', '改代码', '修复', '加个', '改一下', '优化'. Also trigger when creating/editing .java .py .ts .js .go .rs .sh .tsx .jsx .vue .css .scss files, or after debugging identifies root cause and implementation begins."
 ---
 
 # Coding — Write Code Right
@@ -9,8 +9,11 @@ description: "Enforces coding best practices: LSP init, TDD red-green-refactor, 
 - "帮我实现这个功能"
 - "fix this bug in the auth module"
 - "重构一下这段代码"
-- "write a Python script to parse CSV"
-- "add error handling to this function"
+- "修复 PR review 发现的问题"
+- "改一下这个 hook 的逻辑"
+- "apply the review feedback"
+- "优化这段代码的性能"
+- "加个字段到这个 model 里"
 
 ## Overview
 
@@ -43,18 +46,46 @@ Before writing any code in a worktree or submodule:
 
 **If LSP init fails:** Retry with `/code init -f`. If still fails, log to plan Errors and continue with grep fallback — but note degraded analysis quality.
 
+## Phase 0.5: Deep Read — Build Understanding (MANDATORY)
+
+> **This phase is NOT optional.** Even for "simple" changes, you MUST complete it before writing any code.
+> Research shows: the most expensive failure mode is code that is "correct in isolation but breaks the surrounding system" (Boris Tane). Agents only explore dependencies 42% of the time when left to decide on their own (CodeCompass). This phase forces the other 58%.
+
+```
+1. goto_definition — navigate to the code you'll change, read it deeply (not skim)
+
+2. find_references — map ALL callers and dependents of the symbols you'll modify
+   Output: list of files and functions that call/use the target code
+
+3. get_document_symbols — understand the internal structure of files you'll modify
+   Output: key types, functions, constants in each file
+
+4. Read adjacent code — other files in the same module/package
+   Look for: naming conventions, error handling patterns, test patterns, shared utilities
+
+5. get_diagnostics — record current state (zero new errors allowed after your change)
+
+6. Synthesize a Codebase Understanding summary (output this explicitly):
+
+   Codebase Understanding:
+   - Module role: [what this module does in the system]
+   - File structure: [key symbols in the files you'll modify]
+   - Callers: [who calls the code you'll modify]
+   - Dependencies: [what the target code depends on]
+   - Conventions: [code style, naming, error handling patterns]
+   - Impact scope: [which other files/modules could be affected by your change]
+
+7. Signal completion:
+   touch /tmp/omk-coding-deep-read-done
+```
+
+**If you cannot answer any field in the Codebase Understanding summary**, you haven't read enough code. Go back and read more before proceeding.
+
 ## Phase 1: Understand Before Changing
 
-Before modifying any file:
+Before modifying any file, confirm you completed Phase 0.5 and that your Codebase Understanding covers the target code.
 
-```
-1. goto_definition — navigate to the code you'll change
-2. find_references — know all callers/dependents
-3. get_diagnostics — current state (zero new errors allowed)
-4. Read surrounding code — understand conventions, patterns, naming
-```
-
-**Rules:**
+**Rules (Iron Rules — no exceptions):**
 - No modify without goto_definition
 - No refactor without find_references
 - No new public API without searching for existing similar abstractions
