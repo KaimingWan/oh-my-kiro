@@ -192,6 +192,18 @@ Before committing, review your own diff:
 
 **If any check fails:** Fix before committing. Don't leave TODOs for "later."
 
+## Phase 4.5: Self-Explanation
+
+After self-review, explain your changes in natural language before committing:
+
+```
+1. What did I change and why?
+2. How do my changes interact with the callers/dependencies identified in Phase 0.5 (Codebase Understanding)?
+3. Are there potential side effects on other modules?
+```
+
+**If you discover a logical contradiction while explaining** → go back to Phase 2 and revisit the implementation. The act of explaining often reveals errors that code review misses (Self-Debugging research: explanation outperforms chain-of-thought for error detection).
+
 ## Phase 5: Commit
 
 ```bash
