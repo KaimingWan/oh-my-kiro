@@ -34,9 +34,9 @@ elif echo "$USER_MSG" | grep -qiE '(research|investigate|look into|compare.*opti
 fi
 
 # Debugging skill reminder
-if echo "$USER_MSG" | grep -qE '(报错|\bbug\b|调试|修复|测试失败|不工作了|失败了|checks?\s*失败|CI\s*失败|build\s*失败|lint\s*失败|挂了)'; then
+if echo "$USER_MSG" | grep -qE '(报错|排查|诊断|调试|修复|异常|无效|出错|错误|问题|故障|不对|不通|不工作|不生效|没反应|没效果|测试失败|失败了|挂了|崩了|卡住|超时|checks?\s*失败|CI\s*失败|build\s*失败|lint\s*失败)'; then
   emit "🐛 Debug detected → read skills/debugging/SKILL.md. Use LSP tools (get_diagnostics, search_symbols, find_references) BEFORE attempting fixes."
-elif echo "$USER_MSG" | grep -qiE '(\btest.*(fail|brok)|traceback|exception.*thrown|crash|not working|fix.*bug|\bis broken\b|\bbug\b|\bfix\b|checks?\s*fail|CI\s*fail|build\s*fail|lint\s*(fail|error))'; then
+elif echo "$USER_MSG" | grep -qiE '(\btest.*(fail|brok)|traceback|exception|stack.?trace|\berror\b|crash|not working|\bis broken\b|\bbug\b|\bfix\b|\bdebug\b|diagnos|troubleshoot|invalid|timeout|hang|checks?\s*fail|CI\s*fail|build\s*fail|lint\s*(fail|error))'; then
   emit "🐛 Debug detected → read skills/debugging/SKILL.md. Use LSP tools (get_diagnostics, search_symbols, find_references) BEFORE attempting fixes."
 fi
 
