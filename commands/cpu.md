@@ -5,6 +5,30 @@ Only operate on the current project (where AGENTS.md lives). NEVER cd into or co
 
 ## Steps
 
+### Step 0: Update README (the "U" in CPU)
+
+Before committing, check if README.md needs updating based on what changed.
+
+1. Run `git diff --name-only HEAD` (or `git diff --name-only --cached HEAD` if staged) to get changed files.
+
+2. Check each category against README.md:
+
+| Changed path pattern | README section to check |
+|---------------------|------------------------|
+| `commands/*.md` (new file) | Command table (`@command` rows) |
+| `skills/*/SKILL.md` (new file) | Skills table or list |
+| `hooks/**/*.sh` (new file) | Hooks section or directory tree |
+| Any new top-level directory | Directory tree in README |
+
+3. For each mismatch found:
+   - Read the new file to understand what it does (first line or description field)
+   - Add the missing entry to the appropriate README section
+   - Match the format of existing entries exactly
+
+4. If no README updates needed, skip silently. If updates were made, stage them with the rest.
+
+**Rule:** Only ADD entries for new files. Do NOT rewrite, reformat, or "improve" existing README content.
+
 ### Step 1: Stage & Commit
 1. `git add -A && git status --short` — show what's staged
 2. Ask user for commit message if not provided, or generate one from the diff
