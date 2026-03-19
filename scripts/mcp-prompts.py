@@ -145,6 +145,52 @@ User's requirement:
 {content}
 """
 
+DO_PROMPT = """\
+Lightweight command for small tasks (< 1 hour). No plan file, no review dispatch.
+
+## Task
+{content}
+
+## Stage 1: Scratchpad (MANDATORY)
+
+Before ANY code change, write a scratchpad to `/tmp/task-scratch.md`:
+
+```markdown
+## Task: <one-line description>
+- Files: <list files to read/modify, discovered via LSP>
+- Constraint: <key constraints or gotchas>
+- Verify: <how to verify success>
+```
+
+Discovery steps (silent, no user output):
+1. `search_symbols` / `find_references` / `get_diagnostics` to identify all affected files
+2. Read each affected file's relevant sections (NOT entire files — use line offsets)
+3. Update scratchpad with actual file list and key findings
+
+## Stage 2: Execute
+
+Make changes following `skills/omk-coding/SKILL.md` Phase 1-4.
+
+**Context anchor rule**: After EVERY code modification, append a one-line status to the scratchpad:
+```
+- [done] modified file L37-41: description
+- [blocked] test fails: reason
+```
+
+## Stage 3: Verify
+
+1. Run the verify method from scratchpad
+2. Re-read scratchpad to confirm all items addressed
+3. Report result to user
+
+## Multi-turn recovery
+
+If the conversation has gone ≥ 3 turns on this task:
+1. STOP and re-read `/tmp/task-scratch.md`
+2. Compare current state vs scratchpad — identify drift
+3. If drifted, state what drifted and correct course
+"""
+
 AUTO_PROMPT = """\
 You MUST follow this exact sequence. @auto is a fully automated pipeline — no user confirmation between stages except when Stage 1 determines a user decision is required.
 
@@ -383,6 +429,12 @@ def ck(content: str = "") -> str:
 def review(content: str = "") -> str:
     """Code review with SOLID, security, quality, and removal checks. Pass diff range or description."""
     return REVIEW_PROMPT.replace("{content}", content or "(no scope specified — review all uncommitted changes)")
+
+
+@mcp.prompt()
+def do(content: str = "") -> str:
+    """Lightweight task execution (< 1 hour). Pass your task description."""
+    return DO_PROMPT.replace("{content}", content or "(no task provided — wait for user's next message)")
 
 
 @mcp.prompt()

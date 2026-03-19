@@ -105,6 +105,7 @@ These can be invoked as `@command` or via MCP prompt `@o/command <your input>`:
 | `@review` | `@o/review` | Dispatch reviewer subagent → categorize P0-P3 → cite file:line |
 | `@cpr` | `@o/cpr` | Commit → push → create Pull Request → worktree cleanup |
 | `@ck` | `@o/ck` | Checkout branch into submodule worktree (fuzzy search support) |
+| `@do` | `@o/do` | Lightweight task (< 1 hour): scratchpad → implement → verify. No plan file, no review dispatch |
 | `@agent` | `@o/agent` | Distill a top-level principle into `knowledge/rules.md` |
 | `@know` | `@o/know` | Capture knowledge insight into `knowledge/episodes.md` |
 
@@ -113,7 +114,6 @@ These can be invoked as `@command` or via MCP prompt `@o/command <your input>`:
 | Command | Workflow |
 |---------|----------|
 | `@execute` | Load approved plan → Ralph Loop: outer Python loop checks checklist → fresh CLI per iteration → circuit breaker (3 stalls) |
-| `@do` | Lightweight task (< 1 hour): scratchpad → implement → verify. No plan file, no review dispatch |
 | `@cpu` | Commit → push → detect worktree → merge or create PR (no PR creation, direct merge focus) |
 | `@wt` | List all worktrees with status, clean up merged branches |
 | `@lint` | Health check: instruction file line count, rules file sizes, duplication detection, sync verification |
