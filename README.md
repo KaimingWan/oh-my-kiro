@@ -50,52 +50,72 @@ When you say "no, use X not Y", the agent captures the pattern and writes it to 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  L1: Commands (User-Triggered, 100% Deterministic)       │
-│  @plan · @execute · @research · @review · @cpu           │
-│  @lint · @skill                                          │
-│  Each hardcodes the full workflow — no steps skipped.    │
-├─────────────────────────────────────────────────────────┤
-│  L2: Gates & Security (PreToolUse, 100% Hard Block)      │
-│  pre-write · enforce-ralph-loop · enforce-work-dir       │
-│  require-regression · block-dangerous · block-secrets    │
-│  block-sed-json · block-outside-workspace                │
-├─────────────────────────────────────────────────────────┤
-│  L3: Feedback (PostToolUse/Stop/UserPromptSubmit)        │
-│  post-write (lint+test+OV) · post-bash (verify-log+OV)  │
-│  verify-completion · correction-detect · auto-capture    │
-│  session-init · context-enrichment · kb-health-report    │
-├─────────────────────────────────────────────────────────┤
-│  Skills (On-Demand, 11 core)                             │
-│  planning · reviewing · coding · debugging · research    │
-│  verification · finishing · self-reflect · context7-docs │
-│  agent · know                                            │
-├─────────────────────────────────────────────────────────┤
-│  Skill Security (Supply Chain Hardening)                  │
-│  audit-skill.sh — 8-category threat scan                 │
-│  install-skill.sh — audit gate before registration       │
-│  patterns.sh — block bare npx skill installation         │
-├─────────────────────────────────────────────────────────┤
-│  Subagents (Task Isolation, 3 specialists)               │
-│  reviewer · researcher · executor                        │
-├─────────────────────────────────────────────────────────┤
-│  Knowledge (Persistent Memory + OV Semantic Search)      │
-│  rules.md · episodes.md · INDEX.md routing               │
-│  OpenViking daemon for semantic recall                   │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│  L1: Commands (User-Triggered, 100% Deterministic)        │
+│  @plan · @auto · @execute · @do · @research · @review     │
+│  @cpu · @cpr · @ck · @wt · @lint · @skill                 │
+│  Each hardcodes the full workflow — no steps skipped.     │
+├──────────────────────────────────────────────────────────┤
+│  L2: Gates & Security (PreToolUse, 100% Hard Block)       │
+│  pre-write · enforce-ralph-loop · enforce-work-dir        │
+│  require-regression · block-dangerous · block-secrets     │
+│  block-sed-json · block-outside-workspace                 │
+├──────────────────────────────────────────────────────────┤
+│  L3: Feedback (PostToolUse/Stop/UserPromptSubmit)         │
+│  post-write (lint+test+OV) · post-bash (verify-log+OV)   │
+│  verify-completion · correction-detect · auto-capture     │
+│  session-init · context-enrichment · kb-health-report     │
+├──────────────────────────────────────────────────────────┤
+│  Skills (On-Demand, 13 core)                              │
+│  planning · reviewing · coding · debugging · research     │
+│  verification · finishing · self-reflect · context7-docs  │
+│  skill-creation · youtube · agent · know                  │
+├──────────────────────────────────────────────────────────┤
+│  Skill Security (Supply Chain Hardening)                   │
+│  audit-skill.sh — 8-category threat scan                  │
+│  install-skill.sh — audit gate before registration        │
+│  patterns.sh — block bare npx skill installation          │
+├──────────────────────────────────────────────────────────┤
+│  Subagents (Task Isolation, 3 specialists)                │
+│  reviewer · researcher · executor                         │
+├──────────────────────────────────────────────────────────┤
+│  Knowledge (Persistent Memory + OV Semantic Search)       │
+│  rules.md · episodes.md · INDEX.md routing                │
+│  OpenViking daemon for semantic recall                    │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ## Custom Commands
 
 The primary way to trigger workflows deterministically. Each command hardcodes the full step chain — the agent cannot skip steps.
 
+Commands come in two flavors:
+- **Dual-mode** — available both as `@command` (in AGENTS.md) and as MCP prompt `@o/command <args>` (can accept inline arguments)
+- **Command-only** — only available as `@command` in chat, no MCP prompt variant
+
+### Dual-mode Commands (command + MCP prompt)
+
+These can be invoked as `@command` or via MCP prompt `@o/command <your input>`:
+
+| Command | MCP Prompt | Workflow |
+|---------|-----------|----------|
+| `@plan` | `@o/plan` | Deep understanding (Phase 0) → write plan with TDD checklist → dispatch reviewer subagents → fix until APPROVE → user confirm → Ralph Loop |
+| `@auto` | `@o/auto` | Fully automated `@plan`: autonomous understanding (no user Q&A) → plan → review (auto-fix up to 2 rounds) → execute |
+| `@research` | `@o/research` | L0 built-in knowledge → L1 web search → L2 deep research → write findings to file |
+| `@review` | `@o/review` | Dispatch reviewer subagent → categorize P0-P3 → cite file:line |
+| `@cpr` | `@o/cpr` | Commit → push → create Pull Request → worktree cleanup |
+| `@ck` | `@o/ck` | Checkout branch into submodule worktree (fuzzy search support) |
+| `@agent` | `@o/agent` | Distill a top-level principle into `knowledge/rules.md` |
+| `@know` | `@o/know` | Capture knowledge insight into `knowledge/episodes.md` |
+
+### Command-only (no MCP prompt)
+
 | Command | Workflow |
 |---------|----------|
-| `@plan` | Deep understanding (Phase 0) → write plan with TDD checklist → dispatch 4 reviewer subagents → fix until APPROVE → user confirm |
-| `@execute` | Load approved plan → Ralph Loop: outer Python loop checks checklist → fresh CLI per iteration → circuit breaker (3 stalls) → auto-launched from `@plan` |
-| `@research` | L0 built-in knowledge → L1 web search → L2 deep research → write findings to file |
-| `@review` | Dispatch reviewer subagent → categorize P0-P3 → cite file:line |
-| `@cpu` | Commit all changes → push to remote → detect worktree → merge or create PR |
+| `@execute` | Load approved plan → Ralph Loop: outer Python loop checks checklist → fresh CLI per iteration → circuit breaker (3 stalls) |
+| `@do` | Lightweight task (< 1 hour): scratchpad → implement → verify. No plan file, no review dispatch |
+| `@cpu` | Commit → push → detect worktree → merge or create PR (no PR creation, direct merge focus) |
+| `@wt` | List all worktrees with status, clean up merged branches |
 | `@lint` | Health check: instruction file line count, rules file sizes, duplication detection, sync verification |
 | `@skill` | List all skills with descriptions, match user need to closest skill |
 
@@ -144,7 +164,7 @@ The primary way to trigger workflows deterministically. Each command hardcodes t
 | `ov-init.sh` | OpenViking client: `ov_init()`, `ov_search()`, `ov_add()`, `ov_session_commit()` |
 | `block-recovery.sh` | Recovery from hook-blocked operations |
 
-## Skills (11 Core)
+## Skills (13 Core)
 
 | Skill | Purpose |
 |-------|---------|
@@ -157,8 +177,10 @@ The primary way to trigger workflows deterministically. Each command hardcodes t
 | `finishing` | Branch completion: merge / PR / keep / discard + worktree cleanup |
 | `self-reflect` | Capture corrections → extract insight → dedup check → append to episodes.md |
 | `context7-docs` | Fetch current library/framework documentation via Context7 MCP |
-| `agent` | Codify agent identity and principles into AGENTS.md |
-| `know` | Persist knowledge discoveries to knowledge/ files |
+| `skill-creation` | Create production-ready skills from scratch: template, audit, register |
+| `youtube` | Extract and summarize YouTube video content via subtitle extraction |
+| `agent` | Distill top-level principles into knowledge/rules.md |
+| `know` | Capture knowledge discoveries into knowledge/episodes.md |
 
 ## Skill Security
 
