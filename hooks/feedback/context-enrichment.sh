@@ -80,8 +80,13 @@ for skill_file in $SKILL_DIRS; do
   fi
 done
 
+# @fixpr command — PR review comment handler
+if echo "$USER_MSG" | grep -qE '^@fixpr\b|^/fixpr\b'; then
+  emit "🔧 PR fix mode → read commands/fixpr.md. Build PR Blueprint before any code changes."
+fi
+
 # @do command — lightweight small task with context anchoring
-if echo "$USER_MSG" | grep -qE '^@do|^/do'; then
+if echo "$USER_MSG" | grep -qE '^@do\b|^/do\b'; then
   emit "⚡ Small task mode → read commands/do.md. Write scratchpad to /tmp/task-scratch.md BEFORE any code change."
   if [ -f /tmp/task-scratch.md ]; then
     emit "📌 Existing scratchpad found — re-read /tmp/task-scratch.md to resume context."
