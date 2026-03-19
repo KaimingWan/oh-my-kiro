@@ -75,6 +75,22 @@ for skill_file in $SKILL_DIRS; do
   fi
 done
 
+# @do command — lightweight small task with context anchoring
+if echo "$USER_MSG" | grep -qE '^@do|^/do'; then
+  emit "⚡ Small task mode → read commands/do.md. Write scratchpad to /tmp/task-scratch.md BEFORE any code change."
+  if [ -f /tmp/task-scratch.md ]; then
+    emit "📌 Existing scratchpad found — re-read /tmp/task-scratch.md to resume context."
+  fi
+fi
+
+# Multi-turn drift detection: if scratchpad exists, remind agent periodically
+if [ -f /tmp/task-scratch.md ] && ! echo "$USER_MSG" | grep -qE '^@|^/'; then
+  SCRATCH_AGE=$(( $(date +%s) - $(stat -f %m /tmp/task-scratch.md 2>/dev/null || echo 0) ))
+  if [ "$SCRATCH_AGE" -lt 3600 ]; then
+    emit "📌 Active task scratchpad exists → re-read /tmp/task-scratch.md if context feels lost."
+  fi
+fi
+
 # @execute command — force ralph loop
 if echo "$USER_MSG" | grep -qE '^@execute|^/execute'; then
   PLAN_POINTER="docs/plans/.active"
