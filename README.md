@@ -1,5 +1,5 @@
 # oh-my-kiro
-[![Release](https://img.shields.io/github/v/release/KaimingWan/oh-my-kiro?include_prereleases)](https://github.com/KaimingWan/oh-my-kiro/releases)
+[![Release](https://img.shields.io/github/v/release/KaimingWan/oh-my-kiro)](https://github.com/KaimingWan/oh-my-kiro/releases)
 
 **Turn your AI coding agent into a self-evolving, personalized super-intelligence.**
 
