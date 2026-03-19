@@ -106,6 +106,7 @@ These can be invoked as `@command` or via MCP prompt `@o/command <your input>`:
 | `@cpr` | `@o/cpr` | Commit → push → create Pull Request → worktree cleanup |
 | `@ck` | `@o/ck` | Checkout branch into submodule worktree (fuzzy search support) |
 | `@do` | `@o/do` | Lightweight task (< 1 hour): scratchpad → implement → verify. No plan file, no review dispatch |
+| `@fixpr` | `@o/fixpr` | PR review comment handler: PR Blueprint → triage → fix/pushback → resolve threads. Global context protection via Protected Code list |
 | `@agent` | `@o/agent` | Distill a top-level principle into `knowledge/rules.md` |
 | `@know` | `@o/know` | Capture knowledge insight into `knowledge/episodes.md` |
 
@@ -263,7 +264,7 @@ The execution engine for approved plans. A Python outer loop (`scripts/ralph_loo
 │                                  # auto-capture, session-init, context-enrichment, kb-health-report
 ├── skills/                        # 11 core skills (each has SKILL.md)
 ├── agents/                        # Subagent prompt files
-├── commands/                      # Custom commands (@plan, @execute, @review, @research, @cpu, @lint, @skill)
+├── commands/                      # Custom commands (@plan, @execute, @review, @research, @cpu, @lint, @skill, @fixpr)
 ├── scripts/
 │   ├── ralph_loop.py              # Ralph Loop: Python outer loop for plan execution
 │   ├── generate_configs.py        # Single source → Kiro configs
