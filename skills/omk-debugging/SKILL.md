@@ -76,9 +76,47 @@ You MUST complete each phase before proceeding to the next.
 
 **BEFORE attempting ANY fix:**
 
+**Step -1: Build Architectural Context (MANDATORY — do NOT skip)**
+
+Before looking at any specific code, build a map of the system around the bug. This step solves the "structural blindness" problem — LLMs process code as text and cannot see dependency graphs, call chains, or architectural boundaries without explicit navigation.
+
+1. Run `generate_codebase_overview` to get the project's high-level module structure
+2. For the bug's core symbol(s), run `find_references` to discover all callers and usage sites
+3. For the bug's file(s), run `get_document_symbols` to understand internal structure
+4. Produce an **Architectural Context** summary:
+
+```
+Architectural Context:
+- Module: [where this code sits in the system architecture]
+- Upstream callers: [who calls the buggy code — list file:function]
+- Downstream dependencies: [what the buggy code depends on]
+- Cross-module impact: [which other modules could be affected by a fix]
+- Hidden dependencies: [files with no semantic overlap but architectural connection]
+```
+
+Why this is mandatory: CodeCompass research (258 trials) showed that dependency graph navigation achieves 99.4% architectural coverage on hidden dependencies vs 76.2% without (+23.2pp). Agents only explore dependencies voluntarily 42% of the time — when skipped, performance equals the no-tool baseline. This step must be forced, not optional.
+
 **Step 0: Check Past Episodes**
 - Read `knowledge/episodes.md` for similar past bugs
 - Past mistakes often repeat — check before investigating from scratch
+
+**Step 0.5: Classify Failure Type (Failure Classification)**
+
+Before diving into investigation, classify the failure to guide your approach. Pick the most likely category:
+
+| Category | Description | Typical Signal |
+|----------|-------------|----------------|
+| Logic/Semantic Error | Code logic is wrong | Test fails, wrong output |
+| Environment/Config Error | Environment, config, or dependency issue | Works locally, fails in CI |
+| Concurrency/Timing Error | Race condition, timing dependency | Intermittent failure |
+| Invalid Invocation | Tool/API call malformed or missing args | Schema error, 400 response |
+| Misinterpretation of Output | Acted on wrong assumption about a return value | Downstream logic wrong |
+| Intent–Plan Misalignment | Solving the wrong problem | Fix doesn't address user's actual issue |
+| Plan Adherence Failure | Skipped required steps or did unplanned actions | Expected step not executed |
+| Invention of New Information | Hallucinated data not in trace/tool output | References nonexistent variable/file |
+| Under-specified Intent | Not enough information to proceed | Need more context from user |
+
+Write your classification into the Diagnostic Evidence (Step 6). If unsure, pick the top 2 candidates and investigate both.
 
 **Step 1: Run get_diagnostics First**
 - Run `get_diagnostics` on the failing file(s) to get compiler errors, warnings, hints
@@ -106,6 +144,7 @@ You MUST complete each phase before proceeding to the next.
 - Git diff, recent commits
 - New dependencies, config changes
 - Environmental differences
+- **If this is a regression** (it used to work, now it doesn't): use the Git Bisect flow in `reference.md` to pinpoint the exact commit that introduced the bug
 
 **Step 6: Gather Diagnostic Evidence**
 
@@ -113,10 +152,17 @@ You MUST produce a **Diagnostic Evidence** summary before moving to Phase 2:
 
 ```
 Diagnostic Evidence:
+- failure_type: [category from Step 0.5 classification]
 - get_diagnostics: [what errors/warnings were found]
 - search_symbols: [what symbols were located]
 - find_references: [what callers/usage sites were found]
 - get_hover: [what type information was revealed]
+- key_variables:
+  - var_name: [variable name]
+    expected: [expected value at this point]
+    actual: [actual value observed]
+    location: [file:line where divergence occurs]
+  - ...
 - Root cause hypothesis: [your conclusion based on above]
 ```
 
@@ -226,6 +272,14 @@ WHEN error is deep in call stack:
    - No other tests broken?
    - Issue actually resolved?
 
+5.5. **Self-Explanation (Rubber Duck Verification)**
+   After verifying the fix works, explain in natural language:
+   - **Root cause**: What exactly was wrong and why?
+   - **Fix logic**: Why does this fix resolve the root cause?
+   - **Side effects**: Could this fix introduce new problems? Check against the Architectural Context from Step -1.
+   
+   If you discover a logical contradiction while explaining → STOP, return to Phase 3 and re-verify your hypothesis. The act of explaining often reveals flawed reasoning that testing alone misses.
+
 6. **If Fix Doesn't Work**
    - STOP
    - Count: How many fixes have you tried?
@@ -246,6 +300,13 @@ WHEN error is deep in call stack:
    - Should we refactor architecture vs. continue fixing symptoms?
 
    **Discuss with your human partner before attempting more fixes**
+
+8. **Post-Fix Review**
+   After the fix is verified and working:
+   - Compare the original buggy code vs the fixed code — is the fix minimal?
+   - Check: did the fix introduce any code smells (duplication, magic numbers, missing error handling)?
+   - Check: does the fix need defensive programming at other call sites? (Refer to Architectural Context from Step -1)
+   - Write a one-line summary for `knowledge/episodes.md` if this is a new bug pattern
 
 ## Red Flags - STOP and Follow Process
 

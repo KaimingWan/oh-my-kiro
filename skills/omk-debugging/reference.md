@@ -134,3 +134,40 @@ for i in $(seq 1 60); do
   sleep 1
 done
 ```
+
+### Git Bisect Regression Localization
+
+Use when a bug is a **regression** — something that used to work but now doesn't.
+
+**When to use:**
+- You can identify a "good" commit (where it worked) and a "bad" commit (where it's broken)
+- The bug is reproducible with a test or manual check
+
+**Flow:**
+```bash
+# 1. Start bisect
+git log --oneline -20  # find good/bad commit range
+git bisect start
+git bisect bad HEAD    # current commit is broken
+git bisect good <known-good-sha>
+
+# 2. Automated mode (preferred — if you have a test)
+git bisect run <test-command>
+# e.g.: git bisect run pytest tests/test_auth.py::test_login -x
+
+# 3. Manual mode (if no automated test)
+# At each step, git checks out a commit. Test it, then:
+git bisect good  # if this commit works
+git bisect bad   # if this commit is broken
+
+# 4. When done — git reports the first bad commit
+git bisect reset  # return to original branch
+```
+
+**After finding the culprit commit:**
+1. Read the full diff: `git show <culprit-sha>`
+2. Understand what changed and why it broke the behavior
+3. This narrows root cause from "somewhere in the codebase" to "this specific change"
+
+**LLM-assisted semantic analysis:**
+For each bisect step's diff, analyze whether the changes are semantically related to the target behavior. This helps when the predicate is noisy (flaky tests, non-deterministic behavior). Focus on: state transitions, error handling changes, and dependency modifications.

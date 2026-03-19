@@ -36,12 +36,43 @@ Dispatch exactly **4 reviewer subagents in parallel** (`agent_name: "reviewer"`)
 
 Each subagent query must include: plan file path + relevant source file paths to read.
 
-### Code Review — single subagent
+### Deterministic Pre-check (main agent, before dispatching reviewers)
 
-Dispatch **1 reviewer subagent** (`agent_name: "reviewer"`) with:
+Before dispatching any reviewer subagent, the **main agent** runs deterministic checks (reviewer subagent only has read/write/shell — no LSP tools):
+
+1. Run `get_diagnostics` on all modified files — collect compiler errors/warnings
+2. Run `pattern_search` for known anti-patterns (bare except, subprocess without timeout, etc.)
+3. Package results as "Pre-check Findings" to include in each reviewer's dispatch query
+
+Pre-check findings are automatically P0/P1 — they don't need LLM judgment. This reduces the reviewer's workload to reasoning-heavy issues only.
+
+### Code Review — size-based dispatch
+
+Choose dispatch mode based on diff size:
+
+**Small PR (<200 lines diff):** Dispatch **1 reviewer subagent** (`agent_name: "reviewer"`) with:
 - What was implemented
 - Plan/requirements reference
 - Git diff range (BASE_SHA..HEAD_SHA)
+- Pre-check Findings from Deterministic Pre-check
+
+**Large PR (≥200 lines diff):** Dispatch **2 reviewer subagents in parallel** (`agent_name: "reviewer"`):
+
+| Agent | Angle | Focus |
+|-------|-------|-------|
+| 1 | Correctness + Security | Functional correctness, input validation, auth, injection, race conditions |
+| 2 | Quality + Architecture | SOLID, code smells, performance, error handling, boundary conditions |
+
+Each agent receives: diff range, pre-check findings, and relevant source file paths. Findings from both agents are merged and deduplicated by the main agent before presenting to user.
+
+## Iron Principle: Respect the Existing Codebase
+
+> The existing code is the stable, battle-tested baseline. It may be 85/100 — not perfect — but it works. Your job is to review the **new code**, not to fix the old code through the PR author.
+
+- **Only review new/changed lines.** Do not raise findings against unchanged existing code, even if it has style issues, minor inefficiencies, or non-ideal patterns.
+- **Judge new code by the standards of the existing codebase**, not by textbook perfection. If the existing code uses `@Autowired` field injection, don't flag the new code for not using constructor injection. If the existing code swallows certain exceptions with a warn log, the new code doing the same is consistent, not a bug.
+- **P2/P3 "style improvement" findings on existing patterns are noise.** Only raise findings on existing code if it's P0/P1 (security vulnerability, data loss, crash) AND directly touched by the PR.
+- **"While we're here" refactors are out of scope.** If the reviewer wants to suggest improving old code, it goes in a separate follow-up issue, not as a PR comment blocking merge.
 
 ## Executing Code Review (for reviewer agent)
 

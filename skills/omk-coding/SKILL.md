@@ -122,6 +122,8 @@ Step 4: Refactor if needed
 | No drive-by fixes | Unrelated improvements go in separate commits |
 | No new dependencies | Unless essential and approved |
 | Backward compatible | Existing callers unaffected unless explicitly intended |
+| **Match existing style** | Follow the conventions of the surrounding code, not your ideal. If the codebase is 85/100, write 85–90/100 code — don't chase 100 |
+| **Don't "fix" old code** | Existing code works. Don't refactor, restyle, or "improve" code outside your change scope. If you see a real problem, file it separately |
 
 ### Code Quality Gates
 
