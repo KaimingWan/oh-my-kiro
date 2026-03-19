@@ -178,9 +178,9 @@ if [ -d "$PROJECT_ROOT/.kiro" ] && [ -d "$OMK_COMMANDS" ]; then
       cmd_name=$(basename "$cmd_file" .md)
       # Skip commands that MCP already exposes (to avoid shadowing)
       if _is_mcp_prompt "$cmd_name"; then
-        # Remove if previously synced (cleanup stale file-based duplicates)
-        if [ -f "$KIRO_PROMPTS/$cmd_name.md" ]; then
-          mv "$KIRO_PROMPTS/$cmd_name.md" ~/.Trash/ 2>/dev/null || true
+        # Remove if previously synced (cleanup stale file-based duplicates AND symlinks)
+        if [ -e "$KIRO_PROMPTS/$cmd_name.md" ] || [ -L "$KIRO_PROMPTS/$cmd_name.md" ]; then
+          mv "$KIRO_PROMPTS/$cmd_name.md" ~/.Trash/ 2>/dev/null || rm -f "$KIRO_PROMPTS/$cmd_name.md"
           CMDS_SKIPPED=$((CMDS_SKIPPED + 1))
         fi
         continue

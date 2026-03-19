@@ -8,7 +8,7 @@ set -euo pipefail
 
 PROJECT_ROOT="${1:-$(pwd)}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-OMK_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+OMK_ROOT="${OMK_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 
 ERRORS=0
 WARNINGS=0
@@ -123,15 +123,19 @@ if [ "$OVERLAY_VALID" = true ]; then
 fi
 
 # ─── E6: AGENTS.md BEGIN/END markers ─────────────────────────────────────────
+# Only require markers in project AGENTS.md if OMK AGENTS.md actually has sections to sync
 AGENTS_MD="$PROJECT_ROOT/AGENTS.md"
-if [ -f "$AGENTS_MD" ]; then
+OMK_AGENTS_MD="$OMK_ROOT/AGENTS.md"
+if [ -f "$AGENTS_MD" ] && [ -f "$OMK_AGENTS_MD" ] && grep -q '<!-- BEGIN OMK' "$OMK_AGENTS_MD" 2>/dev/null; then
   if ! grep -q '<!-- BEGIN OMK' "$AGENTS_MD" 2>/dev/null; then
     err "E6: AGENTS.md missing <!-- BEGIN OMK ... --> markers"
   fi
   if ! grep -q '<!-- END OMK' "$AGENTS_MD" 2>/dev/null; then
     err "E6: AGENTS.md missing <!-- END OMK ... --> markers"
   fi
-  # W5: AGENTS.md >200 lines
+fi
+# W5: AGENTS.md >200 lines (independent of markers)
+if [ -f "$AGENTS_MD" ]; then
   line_count=$(wc -l < "$AGENTS_MD")
   if [ "$line_count" -gt 200 ]; then
     warn "W5: AGENTS.md is $line_count lines (>200) — consider trimming"

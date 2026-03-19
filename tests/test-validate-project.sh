@@ -180,21 +180,21 @@ teardown
 # ─── Test E7: broken symlink → exit 1 ────────────────────────────────────────
 echo "--- T12: E7 broken symlink → exit 1"
 setup
-mkdir -p "$TMP/.claude"
-ln -s "/nonexistent/path/hooks" "$TMP/.claude/hooks"
+mkdir -p "$TMP/.kiro"
+ln -s "/nonexistent/path/hooks" "$TMP/.kiro/hooks"
 OUT=$(bash "$VALIDATE" "$TMP" 2>&1 || true)
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
 assert_exit "E7 broken symlink exits 1" 1 "$RC"
 assert_output_contains "E7 error message" "E7" "$OUT"
-rm -f "$TMP/.claude/hooks"
+rm -f "$TMP/.kiro/hooks"
 teardown
 
 # ─── Test E5: skill name conflicts framework skill → exit 1 ──────────────────
 echo "--- T13: E5 skill name conflicts framework skill → exit 1"
 setup
-mkdir -p "$TMP/skills/planning"
-printf -- "---\nname: planning\n---\n# Planning" > "$TMP/skills/planning/SKILL.md"
-echo '{"extra_skills": ["skills/planning"]}' > "$TMP/.omk-overlay.json"
+mkdir -p "$TMP/skills/omk-planning"
+printf -- "---\nname: omk-planning\n---\n# Planning" > "$TMP/skills/omk-planning/SKILL.md"
+echo '{"extra_skills": ["skills/omk-planning"]}' > "$TMP/.omk-overlay.json"
 OUT=$(bash "$VALIDATE" "$TMP" 2>&1 || true)
 RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
 assert_exit "E5 skill conflict exits 1" 1 "$RC"
@@ -220,8 +220,14 @@ teardown
 echo "--- T15: E6 AGENTS.md missing BEGIN/END markers → exit 1"
 setup
 echo "# Just some content, no markers" > "$TMP/AGENTS.md"
-OUT=$(bash "$VALIDATE" "$TMP" 2>&1 || true)
-RC=$(bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
+# Create mock OMK root with markers so E6 check triggers
+MOCK_OMK=$(mktemp -d)
+mkdir -p "$MOCK_OMK/skills" "$MOCK_OMK/hooks"
+cp "$VALIDATE" "$MOCK_OMK/tools/validate-project.sh" 2>/dev/null || { mkdir -p "$MOCK_OMK/tools"; cp "$VALIDATE" "$MOCK_OMK/tools/"; }
+printf '<!-- BEGIN OMK Identity -->\n# Identity\n<!-- END OMK Identity -->\n' > "$MOCK_OMK/AGENTS.md"
+OUT=$(OMK_ROOT="$MOCK_OMK" bash "$VALIDATE" "$TMP" 2>&1 || true)
+RC=$(OMK_ROOT="$MOCK_OMK" bash "$VALIDATE" "$TMP" >/dev/null 2>&1; echo $?)
+rm -rf "$MOCK_OMK"
 assert_exit "E6 missing markers exits 1" 1 "$RC"
 assert_output_contains "E6 error message" "E6" "$OUT"
 teardown
