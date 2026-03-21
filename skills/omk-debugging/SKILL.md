@@ -34,6 +34,40 @@ If you haven't completed Phase 1, you cannot propose fixes.
 2. **No find_references = No refactor** — Don't refactor without knowing all usage sites
 3. **No get_diagnostics = No claim fixed** — Don't claim a fix without verifying zero new diagnostics
 
+## Investigation Document Protocol
+
+The investigation document (`docs/investigations/{date}-{topic}.md`) is the persistent, cross-session record of a debugging effort. Create one at the start of every non-trivial debug session using `skills/omk-debugging/investigation-template.md`.
+
+### Three-Level Evidence System
+
+| Level | Label | Meaning | Mutability |
+|-------|-------|---------|------------|
+| 🔒 L0 | Machine Facts | Command output, code analysis, API responses, experiment results | **Immutable** — cannot be overridden except by stronger L0 evidence |
+| 👤 L1 | Human Observations | User-reported operations and phenomena | **Protected** — need L0 evidence + documented rationale to challenge |
+| 🤖 L2 | Agent Inferences | AI deductions, hypotheses, analysis conclusions | **Mutable** — can be revised freely; mark old entry ~~struck~~, keep original |
+
+### Section Update Rules
+
+| Section | Update Mode | Rule |
+|---------|-------------|------|
+| Status Overview | **Overwrite** | Refresh after every Stage completion — must reflect current state at all times |
+| Evidence Table | **Append-only** | Never delete or edit existing entries; add new rows only |
+| Investigation Tree | **Overwrite** | Update branch statuses (⬜→✅/❌) as investigation progresses |
+| Decision Log | **Append-only** | Superseded decisions stay; mark status as "❌ 被 D{n} 取代" |
+| Experiment Log | **Append-only** | Each experiment gets a unique EXP-{n} ID for cross-reference |
+| Ruled Out | **Append-only** | Eliminated directions stay permanently to prevent re-investigation |
+| Timeline | **Append-only** | Chronological milestones, never rewritten |
+
+## Anti-regression Rules
+
+These rules prevent new sessions from undoing prior investigation progress:
+
+1. **Overturning 🔒 L0 facts**: Requires stronger L0 evidence (new command output or experiment). Must record both old and new evidence in the Evidence Table with explicit comparison.
+2. **Challenging 👤 L1 observations**: Requires L0 evidence that contradicts the observation. Must document the challenge rationale in the Timeline.
+3. **Revising 🤖 L2 inferences**: Free to revise. Mark the old inference ~~struck~~ (do not delete). New inference must note "取代 I{n}".
+4. **Decision Log**: Rejected decisions must include rejection rationale. New sessions must NOT re-attempt a rejected approach unless new L0 evidence invalidates the rejection reason.
+5. **Ruled Out**: Eliminated investigation directions must NOT be re-investigated unless new L0 evidence emerges that was unavailable when the direction was ruled out.
+
 ## Tool Decision Matrix
 
 | Bug Type | Tool Sequence | Why |
@@ -307,6 +341,7 @@ WHEN error is deep in call stack:
    - Check: did the fix introduce any code smells (duplication, magic numbers, missing error handling)?
    - Check: does the fix need defensive programming at other call sites? (Refer to Architectural Context from Step -1)
    - Write a one-line summary for `knowledge/episodes.md` if this is a new bug pattern
+   - Update the investigation document: set **Status Overview** to 🟢 Resolved, record final root cause and fix in **Decision Log**
 
 ## Red Flags - STOP and Follow Process
 
