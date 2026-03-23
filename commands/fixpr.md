@@ -41,23 +41,39 @@ gh pr diff <PR_NUMBER>
 
 ## Phase 2: Fetch & Triage Review Comments
 
-1. Fetch all pending review threads:
+1. Fetch all pending review threads via GraphQL (gh pr view does NOT support reviewThreads):
 ```bash
-gh pr view <PR_NUMBER> --json reviewThreads --jq '.reviewThreads[] | select(.isResolved == false)'
+gh api graphql -f query='
+query($owner:String!,$repo:String!,$pr:Int!) {
+  repository(owner:$owner,name:$repo) {
+    pullRequest(number:$pr) {
+      reviewThreads(first:100) {
+        nodes {
+          id
+          isResolved
+          comments(first:10) {
+            nodes { id body author { login } path line originalLine }
+          }
+        }
+      }
+    }
+  }
+}' -f owner='<OWNER>' -f repo='<REPO>' -F pr='<PR_NUMBER>' \
+  --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)'
 ```
 
 2. For each unresolved thread, classify:
    - **AGREE** — the reviewer's suggestion is correct, code should be changed
    - **PUSHBACK** — the reviewer misunderstood or the current code is intentionally designed this way
 
-3. Write triage results to `/tmp/fixpr-triage.md`:
+3. Write triage results to `/tmp/fixpr-triage.md` (include thread ID and first comment ID for later use):
 ```markdown
 ## Triage
 
-| # | File:Line | Reviewer Says | Verdict | Reason |
-|---|-----------|--------------|---------|--------|
-| 1 | path:L42 | "rename this" | AGREE | naming is indeed unclear |
-| 2 | path:L88 | "remove this" | PUSHBACK | intentional per Blueprint invariant #2 |
+| # | Thread ID | File:Line | Reviewer Says | Verdict | Reason |
+|---|-----------|-----------|--------------|---------|--------|
+| 1 | PRRT_xxx | path:L42 | "rename this" | AGREE | naming is indeed unclear |
+| 2 | PRRT_yyy | path:L88 | "remove this" | PUSHBACK | intentional per Blueprint invariant #2 |
 ```
 
 ## Phase 3: Fix Code — Blueprint-Guarded Modifications
@@ -83,45 +99,39 @@ For each AGREE item, apply the fix with Blueprint protection:
 For each triaged comment:
 
 ### AGREE items (already fixed):
-1. Reply with what was changed:
+1. Reply to the thread with what was changed:
 ```bash
-gh api graphql -f query='mutation {
-  addPullRequestReviewComment(input: {
-    pullRequestReviewId: "<REVIEW_ID>",
-    body: "Fixed: <brief description of change>",
-    inReplyTo: "<COMMENT_NODE_ID>"
+gh api graphql -f query='mutation($threadId:ID!,$body:String!) {
+  addPullRequestReviewThreadReply(input: {
+    pullRequestReviewThreadId: $threadId,
+    body: $body
   }) { comment { id } }
-}'
+}' -f threadId='<THREAD_NODE_ID>' -f body='Fixed: <brief description of change>'
 ```
 
 2. Resolve the thread:
 ```bash
-gh api graphql -f query='mutation {
-  resolveReviewThread(input: {
-    threadId: "<THREAD_NODE_ID>"
-  }) { thread { isResolved } }
-}'
+gh api graphql -f query='mutation($threadId:ID!) {
+  resolveReviewThread(input: { threadId: $threadId }) { thread { isResolved } }
+}' -f threadId='<THREAD_NODE_ID>'
 ```
 
 ### PUSHBACK items:
 1. Reply with respectful explanation referencing the PR's design intent:
 ```bash
-gh api graphql -f query='mutation {
-  addPullRequestReviewComment(input: {
-    pullRequestReviewId: "<REVIEW_ID>",
-    body: "This is intentional — <explanation referencing Blueprint>. Happy to discuss further.",
-    inReplyTo: "<COMMENT_NODE_ID>"
+gh api graphql -f query='mutation($threadId:ID!,$body:String!) {
+  addPullRequestReviewThreadReply(input: {
+    pullRequestReviewThreadId: $threadId,
+    body: $body
   }) { comment { id } }
-}'
+}' -f threadId='<THREAD_NODE_ID>' -f body='This is intentional — <explanation referencing Blueprint>. Happy to discuss further.'
 ```
 
 2. Resolve the thread (pushback is still a resolution):
 ```bash
-gh api graphql -f query='mutation {
-  resolveReviewThread(input: {
-    threadId: "<THREAD_NODE_ID>"
-  }) { thread { isResolved } }
-}'
+gh api graphql -f query='mutation($threadId:ID!) {
+  resolveReviewThread(input: { threadId: $threadId }) { thread { isResolved } }
+}' -f threadId='<THREAD_NODE_ID>'
 ```
 
 ## Phase 5: Verify & Push
@@ -132,7 +142,17 @@ gh api graphql -f query='mutation {
 
 3. Verify all threads are resolved:
 ```bash
-gh pr view <PR_NUMBER> --json reviewThreads --jq '[.reviewThreads[] | select(.isResolved == false)] | length'
+gh api graphql -f query='
+query($owner:String!,$repo:String!,$pr:Int!) {
+  repository(owner:$owner,name:$repo) {
+    pullRequest(number:$pr) {
+      reviewThreads(first:100) {
+        nodes { isResolved }
+      }
+    }
+  }
+}' -f owner='<OWNER>' -f repo='<REPO>' -F pr='<PR_NUMBER>' \
+  --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)] | length'
 # Expected: 0
 ```
 
