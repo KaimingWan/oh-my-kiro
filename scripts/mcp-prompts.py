@@ -191,6 +191,79 @@ If the conversation has gone ≥ 3 turns on this task:
 3. If drifted, state what drifted and correct course
 """
 
+DEBUG_PROMPT = """\
+You MUST follow this exact sequence. @debug is a fully automated debugging pipeline — no user confirmation between stages. The goal is systematic root cause analysis, not guess-and-check.
+
+```
+NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
+```
+
+## Bug Report
+{content}
+
+## Stage 1: Triage & Context
+
+1. Read `knowledge/episodes.md` — check if this bug pattern has occurred before
+2. Build Architectural Context around the bug:
+   - `find_references` on bug's core symbol(s) → all callers
+   - `get_document_symbols` on bug's file(s) → internal structure
+3. Classify failure type (Logic/Semantic | Environment/Config | Concurrency/Timing | Invalid Invocation | Under-specified Intent)
+4. Write triage summary to `/tmp/debug-scratch.md`
+
+## Stage 2: Root Cause Investigation
+
+Follow `skills/omk-debugging/SKILL.md` Phase 1 + `references/root-cause-protocol.md`. Use LSP tools, NOT grep:
+
+1. `get_diagnostics` on failing file(s)
+2. `search_symbols` → `goto_definition` → `find_references` on involved symbols
+3. Read error messages / stack traces completely
+4. Reproduce the bug consistently
+5. Check recent changes (`git diff`, recent commits)
+
+Produce **Diagnostic Evidence** before proceeding. **Gate:** Without Diagnostic Evidence, DO NOT proceed to Stage 3.
+
+## Stage 3: Pattern Analysis & Hypothesis
+
+Follow `skills/omk-debugging/SKILL.md` Phase 2-3 + `references/pattern-analysis.md`.
+
+1. Find working examples → compare working vs broken → list ALL differences
+2. Form ONE hypothesis: "X is the root cause because Y"
+3. Test with the SMALLEST possible change — one variable at a time
+4. If hypothesis fails → form NEW hypothesis, don't stack fixes
+
+**Gate:** Hypothesis must be confirmed before proceeding to Stage 4.
+
+## Stage 4: Fix & Verify
+
+Follow `skills/omk-debugging/SKILL.md` Phase 4 + `references/implementation-fix.md`.
+
+1. `get_diagnostics` → record baseline
+2. Create failing test case (if possible)
+3. Implement SINGLE fix addressing root cause — no bundled changes
+4. `get_diagnostics` → zero new diagnostics, or revert
+5. Run tests → verify fix, no regressions
+6. Self-explain: root cause → fix logic → side effects
+
+**3-Strike Rule:** If 3 fix attempts fail → STOP, question the architecture, discuss with user.
+
+## Stage 5: Report
+
+```markdown
+## Debug Report
+- **Bug:** <description>
+- **Root Cause:** <what was actually wrong>
+- **Fix:** <what was changed and why>
+- **Verification:** <test results>
+- **Side Effects:** <none | list>
+```
+
+If bug is a new pattern, append one-line summary to `knowledge/episodes.md`.
+
+## Red Flags — Auto-Rollback to Stage 2
+
+Proposing fixes without evidence / using grep instead of LSP / saying "just try X" / stacking changes / skipping reproduction → **STOP. Return to Stage 2.**
+"""
+
 AUTO_PROMPT = """\
 You MUST follow this exact sequence. @auto is a fully automated pipeline — no user confirmation between stages except when Stage 1 determines a user decision is required.
 
@@ -405,6 +478,12 @@ def plan(content: str = "") -> str:
 def auto(content: str = "") -> str:
     """Fully automated pipeline: plan → review → execute. Pass your requirement as the argument."""
     return AUTO_PROMPT.replace("{content}", content or "(no requirement provided — wait for user's next message)")
+
+
+@mcp.prompt()
+def debug(content: str = "") -> str:
+    """Systematic debugging pipeline: triage → root cause → hypothesis → fix → report. Pass bug description."""
+    return DEBUG_PROMPT.replace("{content}", content or "(no bug report provided — wait for user's next message)")
 
 
 @mcp.prompt()

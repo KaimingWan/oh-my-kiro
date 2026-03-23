@@ -6,6 +6,11 @@ Follow skills/omk-planning/SKILL.md Phase 0 to build deep understanding of the g
 ## Step 2: Writing Plan (skill: planning)
 Read skills/omk-planning/SKILL.md, then write a plan to docs/plans/<date>-<slug>.md. The plan MUST include: Goal, Steps with TDD structure, an empty ## Review section, and a ## Checklist section with all acceptance criteria as `- [ ]` items. The checklist is the contract — @execute will not proceed without it.
 
+**Immediately after writing the plan file**, update the active pointer so `@execute` can find it even from a different session:
+```bash
+echo "docs/plans/<plan-file>.md" > docs/plans/.active
+```
+
 ### Checklist Structure Rules (CRITICAL — Ralph Loop depends on these)
 1. **All checklist items go in the `## Checklist` section** (as defined in SKILL.md). Do NOT scatter `- [ ]` items inline across Phases — Ralph Loop and hooks parse `## Checklist` as the single source of truth.
 2. **Each checklist item MUST include an inline verify command** using the format: `- [ ] Description | \`verify_command\`` (e.g., `- [ ] Gateway responds 200 | \`curl -sf http://127.0.0.1:8000/health\``). The verify command must return exit code 0 on success.
@@ -30,7 +35,7 @@ Show the final plan with reviewer verdict. User confirms by saying `@execute` (w
 
 ## Step 7: Hand Off to Execute
 After user confirms (including via `@execute`):
-1. Write the plan file path to `docs/plans/.active` (e.g., `echo "docs/plans/2026-02-14-feature-x.md" > docs/plans/.active`)
+1. Write the plan file path to `docs/plans/.active` (already done in Step 2, but re-write here to ensure correctness after any plan path changes during review)
 2. Clean up: `unlink .brainstorm-confirmed 2>/dev/null || true`
 3. **Auto-commit plan artifacts** — ralph_loop.py requires a clean working tree. Only commit files the agent created/modified during this plan session (plan file, .active, any skill/prompt changes). Do NOT `git add -A` — user may have unrelated edits in progress. Use explicit file paths:
    ```
