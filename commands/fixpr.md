@@ -1,47 +1,18 @@
-Automated PR review comment handler. Fetches review comments, triages them, fixes code for valid ones, pushes back on invalid ones, and resolves all threads — while maintaining global context integrity via PR Blueprint.
+Automated PR fixer: fetch all review comments, triage each one, fix or pushback, reply + resolve every thread. Zero unresolved threads when done.
 
-## Phase 1: PR Blueprint — Build Global Context
+## Step 1: Understand the PR
 
-Before touching ANY code, build a complete understanding of the PR.
-
-1. Identify the PR:
 ```bash
-# If user provides PR URL/number, use it. Otherwise detect from current branch:
-gh pr view --json number,title,body,headRefName,baseRefName,files
+gh pr view <PR> --json number,title,body,headRefName,baseRefName,files,additions,deletions
+gh pr diff <PR>
 ```
 
-2. Fetch the full diff:
-```bash
-gh pr diff <PR_NUMBER>
-```
+Read the full diff. Understand what the PR does and why — this context guards against drift when fixing individual comments.
 
-3. Write the **PR Blueprint** to `/tmp/fixpr-blueprint.md`:
+## Step 2: Fetch ALL Unresolved Review Threads
 
-```markdown
-# PR Blueprint
+**This step is MANDATORY. Do NOT skip it.**
 
-## Original Intent
-<one-line: what this PR is trying to achieve>
-
-## Architecture Decisions
-<key design choices made in this PR — WHY things are done this way>
-
-## File Roles
-| File | Role | Protected Code |
-|------|------|----------------|
-| <path> | <what this file does in the PR> | <critical sections that must NOT be changed> |
-
-## Invariants
-- <list of things that must remain true after any modification>
-```
-
-**Protected Code**: Sections marked in the Blueprint's "Protected Code" column are off-limits unless a review comment explicitly targets them. This prevents accidental regressions when fixing unrelated comments.
-
-4. Read the Blueprint back and confirm it captures the PR's full intent before proceeding.
-
-## Phase 2: Fetch & Triage Review Comments
-
-1. Fetch all pending review threads via GraphQL (gh pr view does NOT support reviewThreads):
 ```bash
 gh api graphql -f query='
 query($owner:String!,$repo:String!,$pr:Int!) {
@@ -51,127 +22,91 @@ query($owner:String!,$repo:String!,$pr:Int!) {
         nodes {
           id
           isResolved
-          comments(first:10) {
-            nodes { id body author { login } path line originalLine }
+          comments(first:5) {
+            nodes { id body author { login } path line }
           }
         }
       }
     }
   }
-}' -f owner='<OWNER>' -f repo='<REPO>' -F pr='<PR_NUMBER>' \
-  --jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)'
+}' -f owner='<OWNER>' -f repo='<REPO>' -F pr='<PR_NUMBER>'
 ```
 
-2. For each unresolved thread, classify:
-   - **AGREE** — the reviewer's suggestion is correct, code should be changed
-   - **PUSHBACK** — the reviewer misunderstood or the current code is intentionally designed this way
+Filter to unresolved threads. If zero unresolved → report "nothing to fix" and stop.
 
-3. Write triage results to `/tmp/fixpr-triage.md` (include thread ID and first comment ID for later use):
-```markdown
-## Triage
+## Step 3: Triage Every Thread
 
-| # | Thread ID | File:Line | Reviewer Says | Verdict | Reason |
-|---|-----------|-----------|--------------|---------|--------|
-| 1 | PRRT_xxx | path:L42 | "rename this" | AGREE | naming is indeed unclear |
-| 2 | PRRT_yyy | path:L88 | "remove this" | PUSHBACK | intentional per Blueprint invariant #2 |
+For each unresolved thread, decide:
+
+| Verdict | Meaning | Action |
+|---------|---------|--------|
+| **AGREE** | Reviewer is right | Fix the code |
+| **PUSHBACK** | Current code is intentional or reviewer misunderstood | Explain why, don't change code |
+
+Show the triage table to the user before proceeding:
+
+```
+| # | Thread ID | File:Line | Comment (summary) | Verdict | Reason |
 ```
 
-## Phase 3: Fix Code — Blueprint-Guarded Modifications
+## Step 4: Fix Code (AGREE items only)
 
-For each AGREE item, apply the fix with Blueprint protection:
+For each AGREE item:
+1. Make the minimal code change
+2. Verify the fix doesn't break other parts of the PR
 
-1. **Re-read Blueprint before EVERY modification** — open `/tmp/fixpr-blueprint.md` and verify the planned change does not violate any invariant or touch Protected Code unrelated to this comment.
+After all AGREE fixes: run build/lint/typecheck if applicable.
 
-2. Make the minimal code change to address the reviewer's comment.
+## Step 5: Reply + Resolve EVERY Thread
 
-3. After each change, append status to `/tmp/fixpr-blueprint.md`:
-```markdown
-## Change Log
-- [fixed] path:L42 — renamed variable per reviewer suggestion (Blueprint check: ✅ no invariant violated)
-```
+**CRITICAL: Both AGREE and PUSHBACK threads get a reply AND a resolve. No exceptions.**
 
-4. If a fix would violate a Blueprint invariant, STOP and re-classify as PUSHBACK with explanation.
-
-**Anti-drift rule**: If you have made ≥ 3 changes without re-reading the Blueprint, STOP immediately, re-read `/tmp/fixpr-blueprint.md`, and verify all changes so far are consistent with the original PR intent.
-
-## Phase 4: Reply & Resolve Threads
-
-For each triaged comment:
-
-### AGREE items (already fixed):
-1. Reply to the thread with what was changed:
+### For AGREE threads:
 ```bash
-gh api graphql -f query='mutation($threadId:ID!,$body:String!) {
-  addPullRequestReviewThreadReply(input: {
-    pullRequestReviewThreadId: $threadId,
-    body: $body
-  }) { comment { id } }
-}' -f threadId='<THREAD_NODE_ID>' -f body='Fixed: <brief description of change>'
-```
-
-2. Resolve the thread:
-```bash
-gh api graphql -f query='mutation($threadId:ID!) {
-  resolveReviewThread(input: { threadId: $threadId }) { thread { isResolved } }
-}' -f threadId='<THREAD_NODE_ID>'
-```
-
-### PUSHBACK items:
-1. Reply with respectful explanation referencing the PR's design intent:
-```bash
-gh api graphql -f query='mutation($threadId:ID!,$body:String!) {
-  addPullRequestReviewThreadReply(input: {
-    pullRequestReviewThreadId: $threadId,
-    body: $body
-  }) { comment { id } }
-}' -f threadId='<THREAD_NODE_ID>' -f body='This is intentional — <explanation referencing Blueprint>. Happy to discuss further.'
-```
-
-2. Resolve the thread (pushback is still a resolution):
-```bash
-gh api graphql -f query='mutation($threadId:ID!) {
-  resolveReviewThread(input: { threadId: $threadId }) { thread { isResolved } }
-}' -f threadId='<THREAD_NODE_ID>'
-```
-
-## Phase 5: Verify & Push
-
-1. Run project-specific checks (lint, typecheck, tests) if applicable.
-
-2. Re-read the PR Blueprint one final time — confirm all changes align with original intent.
-
-3. Verify all threads are resolved:
-```bash
-gh api graphql -f query='
-query($owner:String!,$repo:String!,$pr:Int!) {
-  repository(owner:$owner,name:$repo) {
-    pullRequest(number:$pr) {
-      reviewThreads(first:100) {
-        nodes { isResolved }
-      }
-    }
+# Reply with what was fixed
+gh api graphql -f query='mutation($tid:ID!,$body:String!) {
+  addPullRequestReviewThreadReply(input: {pullRequestReviewThreadId:$tid, body:$body}) {
+    comment { id }
   }
-}' -f owner='<OWNER>' -f repo='<REPO>' -F pr='<PR_NUMBER>' \
-  --jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)] | length'
-# Expected: 0
+}' -f tid='<THREAD_ID>' -f body='Fixed: <what changed>'
+
+# Resolve
+gh api graphql -f query='mutation($tid:ID!) {
+  resolveReviewThread(input:{threadId:$tid}) { thread { isResolved } }
+}' -f tid='<THREAD_ID>'
 ```
 
-4. Commit and push:
+### For PUSHBACK threads:
 ```bash
-git add -A
-git commit -m "fix: address PR review comments"
-git push
+# Reply with explanation
+gh api graphql -f query='mutation($tid:ID!,$body:String!) {
+  addPullRequestReviewThreadReply(input: {pullRequestReviewThreadId:$tid, body:$body}) {
+    comment { id }
+  }
+}' -f tid='<THREAD_ID>' -f body='Intentional: <explanation>. Happy to discuss.'
+
+# Resolve (pushback is still a resolution)
+gh api graphql -f query='mutation($tid:ID!) {
+  resolveReviewThread(input:{threadId:$tid}) { thread { isResolved } }
+}' -f tid='<THREAD_ID>'
 ```
 
-5. Report summary to user:
-```markdown
+## Step 6: Verify Zero Unresolved + Push
+
+```bash
+# Must be 0
+gh api graphql ... --jq '[.nodes[] | select(.isResolved==false)] | length'
+```
+
+Commit, push, report:
+
+```
 ## @fixpr Summary
-- **AGREE (fixed):** N comments
-- **PUSHBACK (replied):** M comments
-- **All threads resolved:** ✅/❌
-- **Blueprint violations:** none / <list>
+- AGREE (fixed): N
+- PUSHBACK (replied): M
+- All threads resolved: ✅
 ```
 
 ---
 User's task:
-(The user's next message provides the PR URL or number. If invoked without arguments, detect PR from current branch.)
+(User provides PR URL/number. If none, detect from current branch.)
