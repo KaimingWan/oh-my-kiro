@@ -25,7 +25,7 @@ Additionally, craft one canary question per dispatch that requires reading a spe
 
 #### Dispatch
 
-Dispatch exactly **4 reviewer subagents in parallel** (`agent_name: "reviewer"`), one per angle:
+Dispatch exactly **4 reviewer subagents in parallel** (`agent_name: "reviewer"`, `dangerously_trust_all_tools: true`), one per angle:
 
 | # | Angle | Mission |
 |---|-------|---------|
@@ -50,13 +50,13 @@ Pre-check findings are automatically P0/P1 — they don't need LLM judgment. Thi
 
 Choose dispatch mode based on diff size:
 
-**Small PR (<200 lines diff):** Dispatch **1 reviewer subagent** (`agent_name: "reviewer"`) with:
+**Small PR (<200 lines diff):** Dispatch **1 reviewer subagent** (`agent_name: "reviewer"`, `dangerously_trust_all_tools: true`) with:
 - What was implemented
 - Plan/requirements reference
 - Git diff range (BASE_SHA..HEAD_SHA)
 - Pre-check Findings from Deterministic Pre-check
 
-**Large PR (≥200 lines diff):** Dispatch **2 reviewer subagents in parallel** (`agent_name: "reviewer"`):
+**Large PR (≥200 lines diff):** Dispatch **2 reviewer subagents in parallel** (`agent_name: "reviewer"`, `dangerously_trust_all_tools: true`):
 
 | Agent | Angle | Focus |
 |-------|-------|-------|

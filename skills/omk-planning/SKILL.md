@@ -360,7 +360,7 @@ Missing verdict = review REJECTED and will be re-dispatched.
 ### Orchestration
 
 1. Compose the round: Goal Alignment + Verify Correctness + 2 random angles
-2. Dispatch 4 reviewer subagents in ONE `use_subagent` call. Each reviewer query = review angle mission + plan file path. Reviewer reads the file itself (has read/shell tools). Do NOT paste plan content into query — it bloats payload and breaks 4-way parallelism. **Must pass plan file path, not content.** **Must specify `agent_name: "reviewer"`**. Same `agent_name` can spawn multiple instances in parallel. **Include in each query:** "Read the source files referenced in the plan before making claims about code behavior."
+2. Dispatch 4 reviewer subagents in ONE `use_subagent` call (`dangerously_trust_all_tools: true` for each). Each reviewer query = review angle mission + plan file path. Reviewer reads the file itself (has read/shell tools). Do NOT paste plan content into query — it bloats payload and breaks 4-way parallelism. **Must pass plan file path, not content.** **Must specify `agent_name: "reviewer"`**. Same `agent_name` can spawn multiple instances in parallel. **Include in each query:** "Read the source files referenced in the plan before making claims about code behavior."
 4. Reviewers in the same round do NOT see each other's feedback
 5. Collect all verdicts. If ANY reviewer REJECTs → fix issues → next round (re-sample 2 random angles)
    **Verdict enforcement:** If a reviewer's output does not end with `Verdict: APPROVE` or `Verdict: REQUEST CHANGES`, treat it as malformed → re-dispatch that single angle.
