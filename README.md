@@ -1,349 +1,410 @@
 # oh-my-kiro
+
 [![Release](https://img.shields.io/github/v/release/KaimingWan/oh-my-kiro)](https://github.com/KaimingWan/oh-my-kiro/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Tests: 56](https://img.shields.io/badge/tests-56_passing-green)]()
 
-**Turn your AI coding agent into a self-evolving, personalized super-intelligence.**
+**Your AI agent forgets everything. Mine doesn't.**
 
-Like oh-my-zsh for Zsh, but for AI coding agents. A framework that makes your agent learn from every interaction, persist valuable knowledge, and get stronger over time — automatically.
+oh-my-kiro is a framework that gives your AI coding agent persistent memory, deterministic workflows, and self-evolving intelligence. Like oh-my-zsh for Zsh — but for AI agents.
+
+_Day 1: generic agent. Day 30: knows your codebase, your style, your decision patterns._
 
 Works with: **Kiro CLI**
 
+[Quick Start](#quick-start) • [Why OMK](#why-oh-my-kiro) • [Commands](#commands) • [Architecture](#architecture)
+
 ---
-
-## The Problem
-
-You use AI coding agents every day. But every new session starts from zero. The agent forgets your preferences, repeats the same mistakes, loses valuable context, and never truly understands your workflow.
-
-**What if your agent could compound its intelligence over time?**
-
-## The Philosophy
-
-### 🔒 Deterministic Over Hopeful
-
-> If it can be enforced by code, don't enforce it with words.
-
-Natural language instructions drift. Hooks don't. This framework uses a **3-layer determinism model**:
-
-| Layer | Mechanism | Certainty |
-|-------|-----------|-----------|
-| L1 Commands | `@plan` `@execute` `@research` `@review` `@cpu` `@skill` `@lint` | 100% — user triggers full workflow |
-| L2 Gates | `hooks/gate/` + `hooks/security/` (PreToolUse exit 2) | 100% — hard block, agent cannot bypass |
-| L3 Feedback | `hooks/feedback/` (PostToolUse/Stop/UserPromptSubmit) | ~50% — advisory, agent may ignore |
-
-### 🔄 Compound Interest Engineering
-
-> Every interaction should make the agent permanently smarter.
-
-The agent captures corrections in real-time and writes them to persistent files. Day 1 it's generic. Day 30 it knows your codebase, your style, your decision patterns.
-
-### 💾 Auto-Persist Valuable Results
-
-> If it's worth generating, it's worth saving.
-
-Research findings → `knowledge/`. Plans → `docs/plans/`. Lessons → `knowledge/rules.md` + `knowledge/episodes.md`. Nothing valuable is lost in chat.
-
-### 🧠 Feedback Loop → Self-Evolution
-
-> The agent detects your corrections and rewires itself.
-
-When you say "no, use X not Y", the agent captures the pattern and writes it to the appropriate file. Next session, it won't need correcting.
-
-## Architecture
-
-```
-┌──────────────────────────────────────────────────────────┐
-│  L1: Commands (User-Triggered, 100% Deterministic)        │
-│  @plan · @auto · @execute · @do · @research · @review     │
-│  @cpu · @cpr · @ck · @wt · @lint · @skill                 │
-│  Each hardcodes the full workflow — no steps skipped.     │
-├──────────────────────────────────────────────────────────┤
-│  L2: Gates & Security (PreToolUse, 100% Hard Block)       │
-│  pre-write · enforce-ralph-loop · enforce-work-dir        │
-│  require-regression · block-dangerous · block-secrets     │
-│  block-sed-json · block-outside-workspace                 │
-├──────────────────────────────────────────────────────────┤
-│  L3: Feedback (PostToolUse/Stop/UserPromptSubmit)         │
-│  post-write (lint+test+OV) · post-bash (verify-log+OV)   │
-│  verify-completion · correction-detect · auto-capture     │
-│  session-init · context-enrichment · kb-health-report     │
-├──────────────────────────────────────────────────────────┤
-│  Skills (On-Demand, 13 core)                              │
-│  planning · reviewing · coding · debugging · research     │
-│  verification · finishing · self-reflect · context7-docs  │
-│  skill-creation · youtube · agent · know                  │
-├──────────────────────────────────────────────────────────┤
-│  Skill Security (Supply Chain Hardening)                   │
-│  audit-skill.sh — 8-category threat scan                  │
-│  install-skill.sh — audit gate before registration        │
-│  patterns.sh — block bare npx skill installation          │
-├──────────────────────────────────────────────────────────┤
-│  Subagents (Task Isolation, 3 specialists)                │
-│  reviewer · researcher · executor                         │
-├──────────────────────────────────────────────────────────┤
-│  Knowledge (Persistent Memory + OV Semantic Search)       │
-│  rules.md · episodes.md · INDEX.md routing                │
-│  OpenViking daemon for semantic recall                    │
-└──────────────────────────────────────────────────────────┘
-```
-
-## Custom Commands
-
-The primary way to trigger workflows deterministically. Each command hardcodes the full step chain — the agent cannot skip steps.
-
-Commands come in two flavors:
-- **Dual-mode** — available both as `@command` (in AGENTS.md) and as MCP prompt `@o/command <args>` (can accept inline arguments)
-- **Command-only** — only available as `@command` in chat, no MCP prompt variant
-
-### Dual-mode Commands (command + MCP prompt)
-
-These can be invoked as `@command` or via MCP prompt `@o/command <your input>`:
-
-| Command | MCP Prompt | Workflow |
-|---------|-----------|----------|
-| `@plan` | `@o/plan` | Deep understanding (Phase 0) → write plan with TDD checklist → dispatch reviewer subagents → fix until APPROVE → user confirm → Ralph Loop |
-| `@auto` | `@o/auto` | Fully automated `@plan`: autonomous understanding (no user Q&A) → plan → review (auto-fix up to 2 rounds) → execute |
-| `@research` | `@o/research` | L0 built-in knowledge → L1 web search → L2 deep research → write findings to file |
-| `@review` | `@o/review` | Dispatch reviewer subagent → categorize P0-P3 → cite file:line |
-| `@cpr` | `@o/cpr` | Commit → push → create Pull Request → worktree cleanup |
-| `@ck` | `@o/ck` | Checkout branch into submodule worktree (fuzzy search support) |
-| `@do` | `@o/do` | Lightweight task (< 1 hour): scratchpad → implement → verify. No plan file, no review dispatch |
-| `@fixpr` | `@o/fixpr` | PR review comment handler: PR Blueprint → triage → fix/pushback → resolve threads. Global context protection via Protected Code list |
-| `@agent` | `@o/agent` | Distill a top-level principle into `knowledge/rules.md` |
-| `@know` | `@o/know` | Capture knowledge insight into `knowledge/episodes.md` |
-
-### Command-only (no MCP prompt)
-
-| Command | Workflow |
-|---------|----------|
-| `@execute` | Load approved plan → Ralph Loop: outer Python loop checks checklist → fresh CLI per iteration → circuit breaker (3 stalls) |
-| `@cpu` | Commit → push → detect worktree → merge or create PR (no PR creation, direct merge focus) |
-| `@wt` | List all worktrees with status, clean up merged branches |
-| `@lint` | Health check: instruction file line count, rules file sizes, duplication detection, sync verification |
-| `@skill` | List all skills with descriptions, match user need to closest skill |
-
-## Hook System
-
-### L2: Hard Gates (PreToolUse — exit 2 = blocked)
-
-| Hook | What It Does |
-|------|-------------|
-| `gate/pre-write.sh` | Instruction file write protection + brainstorming gate for plan creation + plan structure validation |
-| `gate/enforce-ralph-loop.sh` | Blocks direct source edits when an active plan exists — forces execution through Ralph Loop |
-| `gate/enforce-work-dir.sh` | Restricts file writes to the plan's declared Work Dir during execution |
-| `gate/require-regression.sh` | Blocks checklist check-off for ralph_loop/lib changes without regression tests |
-| `security/block-dangerous.sh` | Blocks `rm -rf`, `sudo`, `curl\|bash`, bare `npx skills add`, etc. |
-| `security/block-secrets.sh` | Scans for API keys, private keys before git commit/push |
-| `security/block-sed-json.sh` | Blocks sed/awk on JSON files — use jq instead |
-| `security/block-outside-workspace.sh` | Blocks file operations outside the project workspace |
-
-### L3: Feedback (PostToolUse/Stop/UserPromptSubmit — advisory)
-
-| Hook | What It Does |
-|------|-------------|
-| `feedback/post-write.sh` | Merged hook: auto-lint + auto-test (30s debounce) + OV index for knowledge files |
-| `feedback/post-bash.sh` | Logs command execution for verify evidence + OV sync for knowledge file changes |
-| `feedback/verify-completion.sh` | Stop hook: checks plan checklist + re-runs all verify commands |
-| `feedback/correction-detect.sh` | Detects user corrections in prompt text |
-| `feedback/auto-capture.sh` | Captures corrections → writes to episodes.md + syncs to OV |
-| `feedback/session-init.sh` | Episode cleanup + promotion reminder + OV daemon auto-start + knowledge sync (once per session) |
-| `feedback/context-enrichment.sh` | Rules injection (keyword-matched) + episode hints + OV semantic search + skill routing reminders |
-| `feedback/kb-health-report.sh` | Knowledge base quality report: cap warnings, promotion candidates |
-
-### Dispatchers
-
-| Hook | What It Does |
-|------|-------------|
-| `dispatch-pre-write.sh` | Routes fs_write events to security + gate hooks in order |
-| `dispatch-pre-bash.sh` | Routes execute_bash events to security + gate hooks in order |
-
-### Shared Libraries (`hooks/_lib/`)
-
-| Library | Purpose |
-|---------|---------|
-| `common.sh` | `hook_block()`, `file_mtime()`, `detect_test_command()`, `is_source_file()`, `find_active_plan()` |
-| `patterns.sh` | Regex patterns for dangerous commands, injection detection, secret detection |
-| `distill.sh` | Episode → rule promotion, section cap enforcement, archive cleanup |
-| `ov-init.sh` | OpenViking client: `ov_init()`, `ov_search()`, `ov_add()`, `ov_session_commit()` |
-| `block-recovery.sh` | Recovery from hook-blocked operations |
-
-## Skills (13 Core)
-
-| Skill | Purpose |
-|-------|---------|
-| `planning` | Full plan lifecycle: Phase 0 (deep understanding) → Phase 1 (write plan with TDD) → Phase 1.5 (4-reviewer parallel review) → Phase 2 (Ralph Loop execution) |
-| `reviewing` | Code and plan review — multi-angle dispatch, P0-P3 categorization, file:line citations |
-| `coding` | Coding best practices enforcement: LSP init, TDD red-green-refactor, minimal changes, self-review, verification |
-| `debugging` | Systematic: reproduce → hypothesize → verify → fix (with LSP-first rule) |
-| `research` | Multi-level: L0 built-in → L1 web search → L2 deep research → persist findings |
-| `verification` | Evidence before completion claims — no shortcuts |
-| `finishing` | Branch completion: merge / PR / keep / discard + worktree cleanup |
-| `self-reflect` | Capture corrections → extract insight → dedup check → append to episodes.md |
-| `context7-docs` | Fetch current library/framework documentation via Context7 MCP |
-| `skill-creation` | Create production-ready skills from scratch: template, audit, register |
-| `youtube` | Extract and summarize YouTube video content via subtitle extraction |
-| `agent` | Distill top-level principles into knowledge/rules.md |
-| `know` | Capture knowledge discoveries into knowledge/episodes.md |
-
-## Skill Security
-
-Agent skills are a supply chain attack surface. Based on [Snyk's ToxicSkills research](https://snyk.io/blog/toxicskills-malicious-ai-agent-skills-clawhub/) (Feb 2026: 36.82% of public skills have security issues), OMK enforces a multi-layer defense:
-
-| Layer | Mechanism | What It Catches |
-|-------|-----------|-----------------|
-| `audit-skill.sh` | 8-category threat scan | Prompt injection, malicious code, credential theft, base64 obfuscation, secret leaks, suspicious downloads |
-| `install-skill.sh` | Audit gate before registration | Blocks CRITICAL skills, warns on HIGH, auto-removes failed skills |
-| `sync-omk.sh` | Audit during framework sync | Blocks compromised skills from propagating to downstream projects |
-| `patterns.sh` | Hook hard block | Prevents bare `npx skills add` — forces all installs through `install-skill.sh` |
-
-### Threat Categories (based on Snyk ToxicSkills taxonomy)
-
-| Category | Severity | Examples |
-|----------|----------|---------|
-| Prompt Injection | 🔴 CRITICAL | "ignore previous instructions", base64 obfuscation, Unicode smuggling, DAN jailbreaks |
-| Malicious Code | 🔴 CRITICAL | eval/exec, shell=True, backdoors |
-| Suspicious Downloads | 🔴 CRITICAL | curl\|bash, password-protected archives |
-| Credential Handling | 🟠 HIGH | Reading ~/.aws/credentials, echoing API keys |
-| Secret Detection | 🟠 HIGH | Hardcoded AWS keys, GitHub tokens, private keys |
-| Third-Party Content | 🟡 MEDIUM | External HTTP fetches (indirect injection vector) |
-| Unverifiable Dependencies | 🟡 MEDIUM | Runtime remote loading, dynamic imports |
-| Excessive Permissions | 🟡 MEDIUM | sudo, systemctl modifications |
-
-Run manually: `bash tools/audit-skill.sh <SKILL_DIR>`
-
-## Subagents (3 Specialists)
-
-| Agent | Role | Config |
-|-------|------|--------|
-| `reviewer` | Plan & code review — must cite file:line, never rubber-stamp | `.kiro/agents/reviewer.json` |
-| `researcher` | Web research + code search — cite sources, cross-verify | `.kiro/agents/researcher.json` |
-| `executor` | Task execution within Ralph Loop — fresh context per iteration | `.kiro/agents/executor.json` |
-
-Additional configs: `pilot.json` (main orchestrator with all hooks wired) and `default.json` (fallback, same as pilot).
-
-## Knowledge System
-
-### Persistent Memory
-
-| File | Purpose |
-|------|---------|
-| `knowledge/INDEX.md` | Routing table: question type → source file |
-| `knowledge/rules.md` | Keyword-sectioned rules, injected per-message by topic match (🔴 critical = always, 🟡 relevant = keyword-matched) |
-| `knowledge/episodes.md` | Mistakes and wins timeline (auto-cleanup on promotion, 30-entry cap) |
-| `knowledge/reference/` | Reference materials (writing style, java coding standards, etc.) |
-
-### OpenViking Semantic Search (Optional)
-
-When configured via `.omk-overlay.json`, the framework uses OpenViking for semantic knowledge recall:
-
-- **Auto-indexing**: knowledge files are automatically synced to OV on every write
-- **Semantic recall**: context-enrichment hook queries OV on every user prompt, injecting relevant knowledge snippets
-- **Daemon**: `scripts/ov-daemon.py` runs as a background process, communicating via Unix socket
-- **Degradation alert**: if OV is unavailable, hooks emit `⚠️ OV unavailable` instead of silently degrading
-
-## Ralph Loop
-
-The execution engine for approved plans. A Python outer loop (`scripts/ralph_loop.py`) that:
-
-1. Reads the plan's `## Checklist` section
-2. Spawns a fresh CLI instance per iteration
-3. Each iteration works on unchecked items until context fills up
-4. Verifies checklist items by running their inline verify commands
-5. Reverts any `- [x]` items whose verify commands fail
-6. Circuit breaker: exits after 3 consecutive rounds with no progress
-7. Prints a full summary on exit (completed / remaining / skipped)
-
-## Project Structure
-
-```
-.
-├── AGENTS.md                      # Agent identity, principles, skill routing
-├── hooks/                         # Unified hook source (single truth)
-│   ├── _lib/                      # common.sh, patterns.sh, distill.sh, ov-init.sh
-│   ├── security/                  # block-dangerous, block-secrets, block-sed-json, block-outside-workspace
-│   ├── gate/                      # pre-write, enforce-ralph-loop, enforce-work-dir, require-regression
-│   └── feedback/                  # post-write, post-bash, verify-completion, correction-detect,
-│                                  # auto-capture, session-init, context-enrichment, kb-health-report
-├── skills/                        # 11 core skills (each has SKILL.md)
-├── agents/                        # Subagent prompt files
-├── commands/                      # Custom commands (@plan, @execute, @review, @research, @cpu, @lint, @skill, @fixpr)
-├── scripts/
-│   ├── ralph_loop.py              # Ralph Loop: Python outer loop for plan execution
-│   ├── generate_configs.py        # Single source → Kiro configs
-│   ├── ov-daemon.py               # OpenViking semantic search daemon
-│   └── lib/                       # Shared Python modules (plan.py, cli_detect.py, etc.)
-├── tools/                         # CLI tools
-│   ├── init-project.sh            # Bootstrap OMK into existing project
-│   ├── install-skill.sh           # Install skill with security audit gate
-│   ├── audit-skill.sh             # 8-category skill security audit
-│   ├── sync-omk.sh               # Sync upstream OMK changes + skill sync
-│   └── validate-project.sh        # Validate project setup
-├── .kiro/                         # Generated Kiro config
-│   ├── agents/*.json              # pilot, reviewer, researcher, executor, default
-│   ├── rules/                     # enforcement, commands, reference, code-analysis
-│   └── settings/                  # lsp.json, mcp.json
-├── knowledge/                     # Persistent memory
-│   ├── INDEX.md                   # Knowledge routing table
-│   ├── rules.md                   # Keyword-section rules (smart injection)
-│   ├── episodes.md                # Mistakes and wins (auto-cleanup)
-│   └── reference/                 # Reference materials
-└── docs/
-    ├── designs/                   # Design documents
-    ├── plans/                     # Implementation plans (.active pointer)
-    └── releases/                  # Release notes
-```
-
-Key design: `hooks/`, `skills/`, `agents/`, `commands/` are the single source of truth. Platform configs are generated by `scripts/generate_configs.py`.
 
 ## Quick Start
 
-### Clone and customize
-
+**New project:**
 ```bash
 git clone https://github.com/KaimingWan/oh-my-kiro.git my-project
 cd my-project
-python3 scripts/generate_configs.py  # Generate platform configs
-# Edit AGENTS.md — define your agent's identity
-# Start chatting — the agent evolves from here
+python3 scripts/generate_configs.py
 ```
 
-### Add to existing project
-
+**Existing project:**
 ```bash
 git submodule add https://github.com/KaimingWan/oh-my-kiro.git oh-my-kiro
 bash oh-my-kiro/tools/init-project.sh . "My Project"
 ```
 
-### Sync updates
-
-```bash
-bash oh-my-kiro/tools/sync-omk.sh .
+**Start building:**
+```
+@auto build a REST API for user management
 ```
 
-This updates the submodule, syncs skills (with security audit), rules, configs, and AGENTS.md sections.
+That's it. The agent understands requirements, writes a plan, reviews it, and executes — all autonomously.
 
-### Cherry-pick
+---
+
+## Why oh-my-kiro?
+
+### The Core Problem: AI Agents Hallucinate and Drift
+
+You tell the agent "always run tests before committing." It does — for 3 turns. Then it forgets. Or it "runs" tests by printing "tests passed" without actually executing anything. Or it skips the step because "the change is trivial."
+
+**Natural language instructions are unreliable.** The agent interprets them probabilistically. It might follow them. It might not. You can't build a reliable workflow on "might."
+
+### The Solution: As-Code, Hook-Based Enforcement
+
+OMK's design philosophy: **if it can be enforced by code, don't enforce it with words.**
+
+- ❌ Prompt: "Never commit secrets" → agent might still do it
+- ✅ Hook: `block-secrets.sh` scans every `git push` → exit 2 = blocked. Zero exceptions.
+
+- ❌ Prompt: "Always run tests after editing" → agent skips when context is tight
+- ✅ Hook: `post-write.sh` auto-triggers lint + test on every file save. Agent doesn't choose.
+
+- ❌ Prompt: "Follow the plan step by step" → agent jumps ahead or skips steps
+- ✅ Hook: `enforce-ralph-loop.sh` blocks direct source edits when a plan exists. Must go through Ralph Loop.
+
+This is not about restricting the agent. It's about **raising the success rate of every operation** by removing the possibility of hallucinated shortcuts.
+
+### What You Get
+
+- **Agent never forgets** — Corrections persist across sessions. Mistakes become rules. Knowledge compounds.
+- **19 hooks enforce, not suggest** — The agent literally cannot `rm -rf /`, commit secrets, skip tests, or edit files outside its workspace.
+- **Agent crashes don't matter** — Ralph Loop keeps spawning fresh agents until every checklist item passes.
+- **Plan → Review → Ship, one command** — `@auto` goes from vague idea to merged code.
+- **Skill supply chain security** — 8-category threat scan on every skill install. Based on [Snyk's ToxicSkills research](https://snyk.io/blog/toxicskills-malicious-ai-agent-skills-clawhub/).
+- **Zero config, full power** — Works out of the box.
+
+---
+
+## The Innovation: 3-Layer Determinism
+
+```
+┌─────────────────────────────────────────────────────┐
+│  L1: Commands — 14 workflows, 100% deterministic     │
+│  @plan @auto @execute @review @research @debug ...   │
+│  Each hardcodes the full step chain. No shortcuts.   │
+├─────────────────────────────────────────────────────┤
+│  L2: Gates — 11 hooks, hard block (exit 2 = denied)  │
+│  Agent CANNOT bypass. Secrets blocked. rm -rf blocked.│
+│  Writes outside workspace blocked. No exceptions.    │
+├─────────────────────────────────────────────────────┤
+│  L3: Feedback — 8 hooks, advisory enrichment         │
+│  Auto-lint on save. Correction detection. Semantic   │
+│  knowledge injection on every prompt.                │
+└─────────────────────────────────────────────────────┘
+```
+
+**Why 3 layers, not just "add more hooks"?**
+
+Not everything should be a hard block. Blocking `rm -rf` is obvious (L2). But "you should run tests" is better as auto-triggered feedback (L3) — the agent sees test results and self-corrects. And "follow this 5-step workflow" is best as a deterministic command (L1) — the agent doesn't interpret, it executes.
+
+The layers map to **certainty levels**: L1 = 100% (user-triggered workflow), L2 = 100% (hard block), L3 = ~50% (advisory, agent may ignore but usually doesn't because the feedback is useful).
+
+**L1 is deterministic.** When you say `@plan`, the agent follows: deep understanding → write plan with TDD checklist → dispatch parallel reviewers → fix until APPROVE → execute via Ralph Loop. It cannot skip steps.
+
+**L2 is a hard wall.** `exit 2` from any gate hook = operation blocked. The agent sees the block, gets a suggested alternative, and retries safely. No amount of prompt engineering bypasses this.
+
+**L3 is compound interest.** Every correction you make is detected, persisted to `episodes.md`, and auto-injected into future sessions by keyword match. After 3 similar corrections, it promotes to a permanent rule.
+
+---
+
+## The Innovation: Ralph Loop
+
+Your agent crashes mid-task? Context window fills up? No problem.
+
+```
+Ralph Loop (Python outer loop)
+  │
+  ├─ Spawn fresh Kiro CLI instance
+  │    └─ Agent reads plan, works on next unchecked item
+  │    └─ Marks item [x] when verify command passes
+  │    └─ Agent exits (crash, context full, or done)
+  │
+  ├─ Re-verify: run all inline verify commands
+  │    └─ Revert any [x] items whose verify fails
+  │
+  ├─ Progress check
+  │    └─ Items completed? → spawn next iteration
+  │    └─ 3 stalls? → circuit breaker, stop
+  │
+  └─ All items [x]? → ✅ Done. Print summary.
+```
+
+Each iteration gets **clean context**. No stale state accumulation. The bash loop is the reliability layer — agent intelligence is the execution layer.
+
+---
+
+## Commands
+
+Commands come in two flavors:
+- **MCP Prompt** (`@o/plan "build a REST API"`) — accepts natural language input inline. The agent receives your description as context.
+- **Command-only** (`@execute`, `@cpu`) — triggered by keyword, no inline arguments. Reads state from files (active plan, git diff, etc.)
+
+### 🚀 The Autonomy Spectrum
+
+#### `@auto` "build a user auth system" _(MCP prompt)_
+**Full autopilot.** One command → understand requirements → write plan with TDD checklist → dispatch parallel reviewers → auto-fix until APPROVE → Ralph Loop execution → done.
+
+_What makes it special:_ Readiness Check — a 4-dimension checklist (Goal / Constraints / Success Criteria / Context) that validates understanding before any code is written. If anything is unclear, it asks exactly ONE question with Socratic challenge modes.
+
+#### `@plan` "migrate from PostgreSQL to DynamoDB" _(MCP prompt)_
+**Controlled execution.** Same pipeline as `@auto`, but pauses for your confirmation after Phase 0 (deep understanding) and after review. You stay in the loop.
+
+_What makes it special:_ Every checklist item requires an inline verify command (`- [ ] API returns 200 | \`curl -sf localhost:8000/health\``). Ralph Loop re-runs these commands and reverts any `[x]` that fails. No false completions.
+
+#### `@execute` _(command-only)_
+**Resume and finish.** Loads an approved plan, launches Ralph Loop. Agent crashes don't matter — the bash loop keeps spawning fresh instances until every checklist item passes.
+
+_What makes it special:_ Work Dir isolation — if the plan declares `**Work Dir:** worktrees/omk-foo`, execution is sandboxed there. The gate hook blocks writes outside that directory.
+
+#### `@do` "add a health check endpoint" _(MCP prompt)_
+**Quick task (< 1 hour).** No plan file, no review dispatch. Scratchpad → implement → verify → commit. For when `@plan` is overkill.
+
+---
+
+### 🔍 Analysis Commands
+
+#### `@review` _(MCP prompt)_
+Dispatches a reviewer subagent with the full git diff. Multi-angle review (correctness, security, performance). Every finding has P0-P3 severity and file:line citation. Auto-detects worktree context from `.active-submodule`.
+
+#### `@debug` "tests fail with timeout on CI" _(MCP prompt)_
+**Systematic debugging pipeline.** Not guess-and-check — structured root cause analysis:
+
+1. Session resume — checks `docs/investigations/` for prior work on this bug (cross-session continuity)
+2. Triage — reads `episodes.md` for known patterns, builds architectural context via LSP
+3. Hypothesis tree — generates ranked hypotheses, tests each with evidence
+4. Fix — only after root cause is confirmed
+
+_What makes it special:_ Investigation documents persist across sessions. If you hit a bug on Monday and resume Wednesday, the agent picks up exactly where it left off.
+
+#### `@research` "how does Kafka handle rebalancing" _(MCP prompt)_
+**3-level research:** L0 built-in knowledge → L1 web search → L2 deep dive with source cross-verification. Findings auto-persisted to file.
+
+---
+
+### 🔧 Git & PR Commands
+
+#### `@fixpr` _(command-only)_
+**Automated PR fixer.** Fetches ALL unresolved review threads via GraphQL, triages each comment (fix / pushback / clarify), implements fixes, replies + resolves every thread. Goal: zero unresolved threads.
+
+_What makes it special:_ PR Blueprint — reads the full diff first to understand intent, then fixes individual comments without drifting from the PR's purpose. Protected Code list prevents reviewers from requesting changes to intentional design decisions.
+
+#### `@cpr` _(MCP prompt)_ · `@cpu` _(command-only)_
+`@cpr`: Commit → push → create PR → worktree cleanup. `@cpu`: Commit → push → merge directly.
+
+#### `@ck` "feature/auth" _(MCP prompt)_ · `@wt` _(command-only)_
+`@ck`: Checkout branch into submodule worktree with fuzzy search. `@wt`: List all worktrees, clean up merged branches.
+
+---
+
+### 🧠 Knowledge Commands
+
+#### `@dream` _(command-only)_
+**Automated knowledge hygiene.** Scans the entire knowledge base for rot:
+- Deterministic (bash): dead links, stale episodes, orphan files, TODO markers, content staleness by type
+- Semantic (LLM): content redundancy, contradictions across files, consolidation recommendations
+
+#### `@agent` _(MCP prompt)_ · `@know` _(MCP prompt)_
+`@agent`: Distill a principle into `rules.md`. `@know`: Capture a knowledge insight into `episodes.md`.
+
+#### `@lint` _(command-only)_ · `@skill` _(command-only)_
+`@lint`: Framework health check. `@skill`: List skills, match user need to closest one.
+
+---
+
+## The Innovation: Self-Evolving Knowledge System
+
+This is not "save notes to a file." It's a **closed-loop intelligence pipeline** that automatically detects mistakes, extracts patterns, and rewires the agent's behavior — permanently.
+
+### How It Works
+
+```
+You say "别用 sed 改 JSON，用 jq"
+  │
+  ├─ correction-detect.sh fires (中英文 30+ 纠正模式匹配)
+  │
+  ├─ auto-capture.sh pipeline:
+  │    ├─ Gate 1: 过滤低价值 (问句丢弃, 无动作丢弃)
+  │    ├─ Gate 2: 提取关键词 (英文技术术语优先, 中文动作词 fallback)
+  │    ├─ Gate 3: 去重 (已在 rules.md → 跳过)
+  │    └─ 写入 episodes.md: "2026-03-30 | active | sed,json,jq | 别用 sed 改 JSON"
+  │
+  ├─ distill.sh (background):
+  │    └─ 同一关键词出现 ≥3 次 → 自动提升为 rules.md 永久规则
+  │    └─ 标记源 episodes 为 "promoted"，下次 session-init 清理
+  │
+  └─ context-enrichment.sh (every prompt):
+       └─ 用户消息包含 "sed" 或 "json" → 自动注入对应规则
+       └─ 🔴 CRITICAL 规则: 每条消息都注入
+       └─ 🟡 RELEVANT 规则: 关键词匹配时注入
+```
+
+### What Makes This Different
+
+**Not just memory — it's immune system.** The agent doesn't just "remember" your correction. It builds antibodies:
+
+1. **Real-time detection** — `correction-detect.sh` matches 30+ correction patterns in both Chinese and English ("你错了", "不是这样", "wrong approach", "try again"). No manual tagging needed.
+
+2. **Quality gates** — Not every correction is worth persisting. `auto-capture.sh` filters out questions, vague complaints, and duplicates. Only actionable corrections with extractable keywords survive.
+
+3. **Auto-promotion** — When the same keyword pattern appears in 3+ episodes, `distill.sh` automatically promotes it to a permanent rule with severity level (🔴 CRITICAL = always injected, 🟡 RELEVANT = keyword-matched).
+
+4. **Smart injection** — `context-enrichment.sh` runs on every user prompt. It keyword-matches the message against `rules.md` sections and injects only relevant rules. Not the whole file — just what matters for this specific message. Budget: max 3 rules per message.
+
+5. **Cross-session continuity** — `session-init.sh` cleans up promoted episodes, reminds about promotion candidates, and bootstraps the knowledge state. Day 1 and Day 100 use the same pipeline.
+
+6. **Semantic search (optional)** — With OpenViking configured, `context-enrichment.sh` also queries a semantic index of all knowledge files, injecting relevant snippets even when keyword matching misses.
+
+### Real Example from Production
+
+After 3 corrections about macOS compatibility, the system auto-promoted this rule:
+
+> 🔴 macOS 没有 `timeout` 命令 (GNU coreutils). Plan 里写 `timeout 60s` 在 macOS 上会 command not found. 替代: `gtimeout` (brew install coreutils). 所有跨平台 bash 脚本不能假设 timeout 存在.
+
+Now every time the agent writes a bash script, this rule is injected. The mistake never happens again.
+
+### Knowledge Hygiene: `@dream`
+
+Knowledge rots. Old corrections become irrelevant. Files contradict each other. `@dream` is the automated janitor:
+
+- **Deterministic (bash):** dead links, stale episodes (>14d → auto-resolved), orphan files, TODO markers, content staleness by type
+- **Semantic (LLM):** content redundancy across files, data contradictions (e.g., "GitHub Stars 8.5K" in one file vs "10K+" in another), consolidation recommendations with priority
+
+---
+
+## Security
+
+### Hook-Level Enforcement
+
+| What's Blocked | How |
+|---------------|-----|
+| `rm -rf`, `sudo`, `curl\|bash` | `security/block-dangerous.sh` — hard block |
+| API keys, private keys in commits | `security/block-secrets.sh` — pre-push scan |
+| `sed`/`awk` on JSON files | `security/block-sed-json.sh` — use jq instead |
+| File writes outside workspace | `security/block-outside-workspace.sh` |
+| Source edits without active plan | `gate/enforce-ralph-loop.sh` |
+| Writes outside declared Work Dir | `gate/enforce-work-dir.sh` |
+
+### Skill Supply Chain
+
+Every skill install goes through `audit-skill.sh` — an 8-category threat scan:
+
+| Threat | Severity |
+|--------|----------|
+| Prompt injection, base64 obfuscation, jailbreaks | 🔴 CRITICAL |
+| eval/exec, shell=True, backdoors | 🔴 CRITICAL |
+| curl\|bash, password-protected archives | 🔴 CRITICAL |
+| Reading ~/.aws/credentials, echoing API keys | 🟠 HIGH |
+| Hardcoded secrets (AWS keys, GitHub tokens) | 🟠 HIGH |
+| External HTTP fetches, dynamic imports | 🟡 MEDIUM |
+| sudo, systemctl modifications | 🟡 MEDIUM |
+
+CRITICAL = blocked. HIGH = warned. All installs gated — no bare `npx skills add` allowed.
+
+---
+
+## Full Kiro Platform Integration
+
+OMK is built to exploit every Kiro platform capability. Not just hooks — the full stack.
+
+### Steering Rules (`.kiro/rules/`)
+
+Kiro's steering rules are always-on instructions injected into every agent interaction. OMK uses 4 steering files as the "constitution":
+
+| File | What It Steers |
+|------|---------------|
+| `enforcement.md` | Complete hook registry with event types, determinism layers (L0-L3), config generation rules |
+| `code-analysis.md` | **LSP-first mandate** — agent must use `search_symbols`, `find_references`, `get_diagnostics` before grep. AST pattern search before text search. `pattern_rewrite` before sed. |
+| `commands.md` | Command routing table: which `@command` triggers which workflow |
+| `reference.md` | Project conventions, naming patterns, file organization rules |
+
+_Why this matters:_ Steering rules are injected by the platform, not by the agent. The agent cannot choose to ignore them. This is a harder guarantee than AGENTS.md instructions.
+
+### LSP-First Code Intelligence
+
+Most AI agents read code with `grep` and `cat`. OMK agents use **Language Server Protocol** — the same intelligence that powers your IDE:
+
+```
+# Instead of: grep -rn "handleRequest" src/
+# OMK agent does:
+search_symbols("handleRequest")     → find definition
+find_references(file, line, col)    → find all callers
+get_hover(file, line, col)          → get type signature
+get_diagnostics(file)               → get compiler errors
+pattern_search("try { $$$ } catch") → find all error handlers (AST-level)
+```
+
+Configured via `.kiro/settings/lsp.json` with support for Rust, Python, TypeScript, Go, and more. The `code-analysis.md` steering rule enforces this — the agent is steered away from grep for code navigation.
+
+### Skills, Hooks, Tools — Single Source of Truth
+
+```
+hooks/     ─── symlinked ──→  .kiro/hooks
+skills/    ─── symlinked ──→  .kiro/skills
+commands/  ─── symlinked ──→  .kiro/prompts
+```
+
+You edit in `hooks/`, `skills/`, `commands/`. The `.kiro/` directory is generated. `scripts/generate_configs.py` produces agent configs, settings, and wiring from these sources. Never edit `.kiro/` directly.
+
+| Kiro Feature | OMK Usage |
+|-------------|-----------|
+| **Hooks** (PreToolUse/PostToolUse/Stop) | 19 hooks: security gates, workflow enforcement, auto-lint, correction detection, knowledge injection |
+| **Skills** (on-demand capabilities) | 14 skills: planning, reviewing, coding, debugging, research, self-reflect, etc. |
+| **Prompts** (MCP commands) | 10 MCP prompts accepting natural language: `@o/plan "build X"`, `@o/debug "Y fails"` |
+| **Agents** (subagent configs) | 5 agent profiles: pilot, reviewer, researcher, executor, default |
+| **Steering** (always-on rules) | 4 rule files: enforcement, code-analysis, commands, reference |
+| **Settings** (LSP + MCP) | LSP for 5+ languages, MCP server for prompt registration |
+
+---
+
+```
+oh-my-kiro/
+├── commands/        # 14 custom commands (single source of truth)
+├── hooks/
+│   ├── security/    # 4 hard blocks
+│   ├── gate/        # 7 enforcement gates
+│   ├── feedback/    # 8 advisory hooks
+│   └── _lib/        # Shared: patterns, distill, OV client
+├── skills/          # 14 on-demand capabilities
+├── scripts/
+│   ├── ralph_loop.py        # The execution engine
+│   ├── generate_configs.py  # Single source → platform configs
+│   └── mcp-prompts.py       # MCP prompt server
+├── knowledge/       # Persistent memory (rules, episodes, INDEX)
+├── agents/          # Subagent prompts (reviewer, researcher)
+├── tools/           # CLI: init, sync, audit, validate
+└── tests/           # 56 test files
+```
+
+**Key design:** `hooks/`, `skills/`, `commands/` are the single source of truth. Platform configs (`.kiro/`) are generated by `generate_configs.py`. Never edit generated files.
+
+---
+
+## Cherry-Pick What You Need
 
 | Want | Copy |
 |------|------|
-| Just hooks | `hooks/` + run `scripts/generate_configs.py` |
-| Just self-learning | `skills/self-reflect/` + `knowledge/rules.md` + `knowledge/episodes.md` |
-| Just knowledge system | `knowledge/` + `hooks/_lib/ov-init.sh` + `scripts/ov-daemon.py` |
-| Just skill security | `tools/audit-skill.sh` + `tools/install-skill.sh` |
-| Just Ralph Loop | `scripts/ralph_loop.py` + `scripts/lib/` |
+| Just the execution engine | `scripts/ralph_loop.py` + `scripts/lib/` |
+| Just self-learning | `skills/omk-self-reflect/` + `knowledge/rules.md` + `knowledge/episodes.md` |
+| Just security hooks | `hooks/security/` + `hooks/_lib/patterns.sh` |
+| Just skill auditing | `tools/audit-skill.sh` + `tools/install-skill.sh` |
 
-## Extending OMK
+---
+
+## Extending
 
 See [EXTENSION-GUIDE.md](docs/EXTENSION-GUIDE.md) for adding project-specific skills, hooks, and knowledge.
+
+---
 
 ## Design Principles
 
 1. **Deterministic over hopeful** — Commands and hard blocks, not soft prompts
 2. **Compound over time** — Every session makes the next one better
-3. **Single source of truth** — `hooks/`, `skills/`, `commands/` → generate platform configs
-4. **Code over prose** — Hooks enforce, words suggest
-5. **Evidence before claims** — Verification first, always
-6. **No hacky workarounds** — Fix root causes, not symptoms
-7. **Bold reform over timid patches** — Quality over backward compatibility
-8. **Secure by default** — All skill installs audited, dangerous commands blocked
+3. **Code over prose** — Hooks enforce, words suggest
+4. **Evidence before claims** — Verification first, always
+5. **Secure by default** — All skill installs audited, dangerous commands blocked
+6. **Bold reform over timid patches** — Quality over backward compatibility
+
+---
 
 ## License
 
