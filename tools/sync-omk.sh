@@ -285,7 +285,8 @@ fi
 
 
 # ─── Step 3.10.5: Sync framework skills ──────────────────────────────────────
-# Copy new/updated OMK skills to project. Project-only skills are untouched.
+# OMK skills → symlink to oh-my-kiro (single source of truth).
+# Project-only skills (non-OMK) are untouched.
 OMK_SKILLS="$OMK_ROOT/skills"
 PROJECT_SKILLS="$PROJECT_ROOT/skills"
 KIRO_SKILLS="$PROJECT_ROOT/.kiro/skills"
@@ -308,17 +309,30 @@ if [ -d "$OMK_SKILLS" ] && [ -d "$PROJECT_SKILLS" ] && [ -d "$KIRO_SKILLS" ]; th
       fi
     fi
 
-    if [ ! -d "$target" ]; then
-      cp -r "$skill_dir" "$target"
-      ln -sf "../../skills/$skill_name" "$KIRO_SKILLS/$skill_name"
-      SKILLS_ADDED=$((SKILLS_ADDED + 1))
-    else
-      # Update existing framework skill (overwrite SKILL.md + resources)
-      rsync -a --delete "$skill_dir" "$target/"
-      # Ensure symlink exists
-      [ -L "$KIRO_SKILLS/$skill_name" ] || ln -sf "../../skills/$skill_name" "$KIRO_SKILLS/$skill_name"
+    # Compute relative path from project skills/ to omk skills/
+    rel_path="../oh-my-kiro/skills/$skill_name"
+
+    if [ -L "$target" ]; then
+      # Already a symlink — verify it points to the right place
+      current=$(readlink "$target")
+      if [ "$current" != "$rel_path" ]; then
+        rm "$target"
+        ln -s "$rel_path" "$target"
+        SKILLS_UPDATED=$((SKILLS_UPDATED + 1))
+      fi
+    elif [ -d "$target" ]; then
+      # Migrate: replace real directory with symlink
+      rm -rf "$target"
+      ln -s "$rel_path" "$target"
       SKILLS_UPDATED=$((SKILLS_UPDATED + 1))
+    else
+      # New skill: create symlink
+      ln -s "$rel_path" "$target"
+      SKILLS_ADDED=$((SKILLS_ADDED + 1))
     fi
+
+    # .kiro/skills/ symlink points to project skills/ (which is now itself a symlink)
+    [ -L "$KIRO_SKILLS/$skill_name" ] || ln -sf "../../skills/$skill_name" "$KIRO_SKILLS/$skill_name"
   done
   if [ "$SKILLS_ADDED" -gt 0 ] || [ "$SKILLS_UPDATED" -gt 0 ] || [ "$SKILLS_BLOCKED" -gt 0 ]; then
     ok "Step 3.10.5: Skills synced ($SKILLS_ADDED added, $SKILLS_UPDATED updated, $SKILLS_BLOCKED blocked)"
