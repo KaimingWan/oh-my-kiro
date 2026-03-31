@@ -121,11 +121,11 @@ Test the evaluator integration in ralph_loop.py:
 ## Checklist
 
 - [x] `commands/evaluate.md` exists with 4 subagent dispatch and mandatory tables | `test -f commands/evaluate.md && grep -q 'REJECTED' commands/evaluate.md`
-- [ ] Evaluate prompt has all 6 dimensions across 4 subagents | `grep -q 'Simplicity' commands/evaluate.md && grep -q 'Alignment' commands/evaluate.md && grep -q 'Correctness' commands/evaluate.md && grep -q 'Security' commands/evaluate.md && grep -q 'Robustness' commands/evaluate.md && grep -q 'Maintainability' commands/evaluate.md`
-- [ ] Evaluate prompt has mandatory table format with REJECTED enforcement | `grep -c 'REJECTED' commands/evaluate.md | xargs test 3 -le`
-- [ ] Evaluate prompt has canary question mechanism | `grep -qi 'canary' commands/evaluate.md`
-- [ ] Evaluate prompt has severity classification | `grep -q 'CRITICAL' commands/evaluate.md && grep -q 'HIGH' commands/evaluate.md`
-- [ ] `mcp-prompts.py` has `evaluate` function registered | `grep -q 'def evaluate' scripts/mcp-prompts.py`
+- [x] Evaluate prompt has all 6 dimensions across 4 subagents | `grep -q 'Simplicity' commands/evaluate.md && grep -q 'Alignment' commands/evaluate.md && grep -q 'Correctness' commands/evaluate.md && grep -q 'Security' commands/evaluate.md && grep -q 'Robustness' commands/evaluate.md && grep -q 'Maintainability' commands/evaluate.md`
+- [x] Evaluate prompt has mandatory table format with REJECTED enforcement | `grep -c 'REJECTED' commands/evaluate.md | xargs test 3 -le`
+- [x] Evaluate prompt has canary question mechanism | `grep -qi 'canary' commands/evaluate.md`
+- [x] Evaluate prompt has severity classification | `grep -q 'CRITICAL' commands/evaluate.md && grep -q 'HIGH' commands/evaluate.md`
+- [x] `mcp-prompts.py` has `evaluate` function registered | `grep -q 'def evaluate' scripts/mcp-prompts.py`
 - [ ] Ralph Loop has evaluator stage after QA | `grep -q 'run_evaluator\|eval_stage\|RALPH_SKIP_EVAL' scripts/ralph_loop.py`
 - [ ] `RALPH_SKIP_EVAL=1` skips evaluator stage | `grep -q 'RALPH_SKIP_EVAL' scripts/ralph_loop.py`
 - [ ] Evaluator extracted as testable function | `grep -q 'def run_evaluator' scripts/ralph_loop.py`

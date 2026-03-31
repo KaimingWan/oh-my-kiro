@@ -11,3 +11,13 @@
   - The hook that guards checklist marking requires the verify command to be run via `execute_bash` immediately before the `str_replace`
   - All 5 Task 1 checklist items (items 1-5) pass verification against the created file, but only item 1 was marked per iteration rules
 - **Status:** done
+
+## Iteration 2 — 2026-03-31T12:12
+
+- **Task:** Mark Task 1 remaining items (dimensions, REJECTED, canary, severity) + implement Task 2 (MCP prompt registration)
+- **Files changed:** `scripts/mcp-prompts.py` (added EVALUATE_PROMPT + evaluate function), `docs/plans/2026-03-31-evaluator.md` (marked items 2-6)
+- **Learnings:**
+  - Items 2-5 (all 6 dimensions, REJECTED enforcement, canary, severity) were already implemented in iteration 1 when `commands/evaluate.md` was created — just needed verify + mark
+  - MCP prompt pattern: constant `XXX_PROMPT` with `{content}` placeholder + `@mcp.prompt()` decorated function that calls `.replace("{content}", content or "fallback")`
+  - The evaluate prompt in mcp-prompts.py is intentionally minimal — it references `commands/evaluate.md` for the full dispatch logic, keeping the prompt DRY
+- **Status:** done
