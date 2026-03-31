@@ -126,12 +126,12 @@ Test the evaluator integration in ralph_loop.py:
 - [x] Evaluate prompt has canary question mechanism | `grep -qi 'canary' commands/evaluate.md`
 - [x] Evaluate prompt has severity classification | `grep -q 'CRITICAL' commands/evaluate.md && grep -q 'HIGH' commands/evaluate.md`
 - [x] `mcp-prompts.py` has `evaluate` function registered | `grep -q 'def evaluate' scripts/mcp-prompts.py`
-- [ ] Ralph Loop has evaluator stage after QA | `grep -q 'run_evaluator\|eval_stage\|RALPH_SKIP_EVAL' scripts/ralph_loop.py`
-- [ ] `RALPH_SKIP_EVAL=1` skips evaluator stage | `grep -q 'RALPH_SKIP_EVAL' scripts/ralph_loop.py`
-- [ ] Evaluator extracted as testable function | `grep -q 'def run_evaluator' scripts/ralph_loop.py`
-- [ ] Regression tests exist | `test -f tests/ralph-loop/test_evaluator.py`
-- [ ] Evaluator tests pass | `cd /Users/wanshao/project/gtm/worktrees/omk-evaluator && python3 -m pytest tests/ralph-loop/test_evaluator.py -v`
-- [ ] 回归测试通过 | `cd /Users/wanshao/project/gtm/worktrees/omk-evaluator && python3 -m pytest tests/ralph-loop/ -v`
+- [x] Ralph Loop has evaluator stage after QA | `grep -q 'run_evaluator\|eval_stage\|RALPH_SKIP_EVAL' scripts/ralph_loop.py`
+- [x] `RALPH_SKIP_EVAL=1` skips evaluator stage | `grep -q 'RALPH_SKIP_EVAL' scripts/ralph_loop.py`
+- [x] Evaluator extracted as testable function | `grep -q 'def run_evaluator' scripts/ralph_loop.py`
+- [x] Regression tests exist | `test -f tests/ralph-loop/test_evaluator.py`
+- [x] Evaluator tests pass | `cd /Users/wanshao/project/gtm/worktrees/omk-evaluator && python3 -m pytest tests/ralph-loop/test_evaluator.py -v`
+- [x] 回归测试通过 | `cd /Users/wanshao/project/gtm/worktrees/omk-evaluator && python3 -m pytest tests/ralph-loop/ -v`
 
 ## Errors
 

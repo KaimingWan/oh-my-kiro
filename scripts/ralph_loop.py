@@ -261,6 +261,7 @@ class Config:
     skip_dirty_check: str = ""
     skip_precheck: str = ""
     skip_review: str = ""
+    skip_eval: str = ""
     plan_pointer: Path | None = None
     instance_slug: str = ""
     work_dir: str = ""
@@ -293,6 +294,7 @@ def parse_config(argv: list[str] | None = None) -> Config:
         skip_dirty_check=os.environ.get("RALPH_SKIP_DIRTY_CHECK", ""),
         skip_precheck=os.environ.get("RALPH_SKIP_PRECHECK", ""),
         skip_review=os.environ.get("RALPH_SKIP_REVIEW", ""),
+        skip_eval=os.environ.get("RALPH_SKIP_EVAL", ""),
         plan_pointer=plan_pointer,
         instance_slug=slug,
         work_dir=os.environ.get("RALPH_WORK_DIR", ""),
@@ -307,6 +309,57 @@ def validate_plan(plan_path: Path) -> PlanFile:
     if plan.total == 0:
         die("Plan has no checklist items. Add a ## Checklist section first.")
     return plan
+
+
+def run_evaluator(plan_path: Path, base_cmd: list[str], project_root: Path,
+                  max_cycles: int = 3, timeout: int = 300) -> bool | None:
+    """Run evaluator stage: evaluate→fix→evaluate loop (up to max_cycles).
+
+    Returns True=PASS, False=FAIL after max cycles, None=error/skipped.
+    """
+    diff_stat = subprocess.run(
+        ["git", "diff", "--stat", "HEAD~1"],
+        capture_output=True, text=True, cwd=str(project_root),
+    ).stdout.strip() or "(no diff)"
+
+    eval_prompt = (
+        f"Evaluate the implementation for plan {plan_path}. "
+        f"Changed files:\n{diff_stat}\n\n"
+        "Read commands/evaluate.md and dispatch 4 parallel evaluator subagents. "
+        "Aggregate results. Output final line: Verdict: PASS or Verdict: FAIL"
+    )
+    fix_prompt = (
+        "The evaluator found issues. Read the evaluator output above and fix all "
+        "CRITICAL and HIGH findings. Then output: FIXES APPLIED"
+    )
+
+    for cycle in range(1, max_cycles + 1):
+        print(f"\n🔍 Evaluator cycle {cycle}/{max_cycles}...", flush=True)
+        try:
+            r = subprocess.run(base_cmd + [eval_prompt],
+                               capture_output=True, text=True,
+                               timeout=timeout, cwd=str(project_root))
+            output = (r.stdout + r.stderr).upper()
+        except (subprocess.TimeoutExpired, OSError) as e:
+            print(f"⚠️ Evaluator cycle {cycle} error: {e}", flush=True)
+            return None
+
+        if "VERDICT: PASS" in output:
+            return True
+
+        if cycle >= max_cycles:
+            return False
+
+        # FAIL → run fix round
+        print(f"🔧 Evaluator FAIL — running fix round {cycle}...", flush=True)
+        try:
+            subprocess.run(base_cmd + [fix_prompt],
+                           capture_output=True, text=True,
+                           timeout=timeout, cwd=str(project_root))
+        except (subprocess.TimeoutExpired, OSError):
+            pass  # best-effort fix, re-evaluate anyway
+
+    return False
 
 
 def main():
@@ -528,6 +581,15 @@ def main():
                 print("❌ QA timed out (300s)", flush=True)
                 final_exit = 1
                 qa_failed = True
+
+    # --- Evaluator stage: independent code quality assessment after QA ---
+    if final_exit == 0 and not cfg.skip_eval:
+        eval_result = run_evaluator(plan_path, base_cmd, PROJECT_ROOT)
+        if eval_result is False:
+            print("❌ Evaluator: FAIL after max cycles", flush=True)
+            final_exit = 1
+        elif eval_result is True:
+            print("✅ Evaluator: PASS", flush=True)
 
     # --- Completion review: dispatch reviewer if QA passed ---
     def completion_review(plan_path: Path, base_cmd: list[str]) -> bool | None:
