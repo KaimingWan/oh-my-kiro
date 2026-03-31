@@ -120,7 +120,7 @@ Test the evaluator integration in ralph_loop.py:
 
 ## Checklist
 
-- [ ] `commands/evaluate.md` exists with 4 subagent dispatch and mandatory tables | `test -f commands/evaluate.md && grep -q 'REJECTED' commands/evaluate.md`
+- [x] `commands/evaluate.md` exists with 4 subagent dispatch and mandatory tables | `test -f commands/evaluate.md && grep -q 'REJECTED' commands/evaluate.md`
 - [ ] Evaluate prompt has all 6 dimensions across 4 subagents | `grep -q 'Simplicity' commands/evaluate.md && grep -q 'Alignment' commands/evaluate.md && grep -q 'Correctness' commands/evaluate.md && grep -q 'Security' commands/evaluate.md && grep -q 'Robustness' commands/evaluate.md && grep -q 'Maintainability' commands/evaluate.md`
 - [ ] Evaluate prompt has mandatory table format with REJECTED enforcement | `grep -c 'REJECTED' commands/evaluate.md | xargs test 3 -le`
 - [ ] Evaluate prompt has canary question mechanism | `grep -qi 'canary' commands/evaluate.md`
