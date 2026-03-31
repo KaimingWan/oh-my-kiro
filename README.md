@@ -78,8 +78,8 @@ This is not about restricting the agent. It's about **raising the success rate o
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  L1: Commands — 14 workflows, 100% deterministic     │
-│  @plan @auto @execute @review @research @debug ...   │
+│  L1: Commands — 15 workflows, 100% deterministic     │
+│  @plan @auto @execute @review @evaluate @debug ...   │
 │  Each hardcodes the full step chain. No shortcuts.   │
 ├─────────────────────────────────────────────────────┤
 │  L2: Gates — 11 hooks, hard block (exit 2 = denied)  │
@@ -164,6 +164,9 @@ _What makes it special:_ Work Dir isolation — if the plan declares `**Work Dir
 
 #### `@review` _(MCP prompt)_
 Dispatches a reviewer subagent with the full git diff. Multi-angle review (correctness, security, performance). Every finding has P0-P3 severity and file:line citation. Auto-detects worktree context from `.active-submodule`.
+
+#### `@evaluate` "scripts/ralph_loop.py look for simplifications" _(MCP prompt)_
+**Independent code quality assessment.** 4 parallel evaluator subagents — each with a distinct persona (Refactoring Expert, Product Manager, Breaker, CSO) — assess code across 6 dimensions: Simplicity, Alignment, Correctness, Security, Robustness, Maintainability. Mandatory fill-table format prevents walk-through reviews. Also runs automatically after `@execute` completes (GAN-inspired adversarial loop, up to 3 rounds).
 
 #### `@debug` "tests fail with timeout on CI" _(MCP prompt)_
 **Systematic debugging pipeline.** Not guess-and-check — structured root cause analysis:

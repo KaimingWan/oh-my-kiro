@@ -468,6 +468,29 @@ You MUST read skills/omk-research/SKILL.md first, then follow its search level s
 {content}
 """
 
+EVALUATE_PROMPT = """\
+# @evaluate — Independent Code Quality Assessment
+
+Dispatch 4 parallel evaluator subagents to assess implemented code quality.
+
+## Scope
+{content}
+
+## Steps
+Follow `commands/evaluate.md` exactly:
+1. Resolve evaluation target (user path → .active-submodule → project root)
+2. Gather context (plan goals + git diff)
+3. Dispatch 4 parallel subagents (Refactoring Expert, Product Manager, Breaker, CSO)
+4. Aggregate results — any FAIL or CRITICAL → overall FAIL
+"""
+
+
+@mcp.prompt()
+def evaluate(content: str = "") -> str:
+    """Evaluate code quality with 4 parallel subagents. Pass scope or path to evaluate."""
+    return EVALUATE_PROMPT.replace("{content}", content or "(no scope specified — evaluate current changes)")
+
+
 @mcp.prompt()
 def plan(content: str = "") -> str:
     """Create an implementation plan. Pass your requirement as the argument."""
