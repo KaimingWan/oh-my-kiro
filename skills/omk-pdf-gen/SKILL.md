@@ -91,7 +91,7 @@ body { font-family: "Hiragino Sans GB", "Heiti SC", "Noto Sans CJK SC", sans-ser
 h1 { font-size: 22pt; text-align: center; }
 h3 { font-size: 13pt; color: #1a73e8; }
 table { width: 100%; border-collapse: collapse; font-size: 10pt; }
-th { background: #1a1a2e; color: #fff; padding: 7pt 10pt; text-align: left; }
+th { background: #1a73e8; color: #fff; padding: 7pt 10pt; text-align: left; }
 td { padding: 6pt 10pt; border-bottom: 1px solid #e5e7eb; }
 tr:nth-child(even) td { background: #f8f9fa; }
 ```
